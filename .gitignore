@@ -1,0 +1,10 @@
+### IDEA ###
+.idea/*
+*.iml
+*/target/*
+*/*.iml
+/.gradle/
+/application.pid
+avatar
+memeadmin.pid
+memeapp.pid
