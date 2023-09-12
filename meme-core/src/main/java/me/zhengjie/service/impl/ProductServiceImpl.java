@@ -113,6 +113,13 @@ public class ProductServiceImpl implements ProductService {
         criteria.setPortStatus(channel.getPortStatus());
         criteria.setStatus("onShelves");
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
+//        if (ObjectUtil.isNotEmpty(productList)) {
+//            if (productList.size() > 1) {
+//
+//            } else {
+//
+//            }
+//        }
         return productMapper.toDto(productList).stream().map(p -> {
             p.setApplyNum(this.getApplyNum(p.getId().toString()));
             return p;
