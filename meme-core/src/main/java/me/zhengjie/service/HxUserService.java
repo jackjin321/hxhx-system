@@ -21,8 +21,10 @@ import me.zhengjie.service.dto.HxUserDto;
 import me.zhengjie.service.dto.HxUserDtoV2;
 import me.zhengjie.service.dto.HxUserLoginDto;
 import me.zhengjie.service.dto.HxUserQueryCriteria;
+import me.zhengjie.vo.UserNumVO;
 import org.springframework.data.domain.Pageable;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
@@ -80,7 +82,7 @@ public interface HxUserService {
      */
     HxUserLoginDto getLoginData(String phone);
 
-    String createUser(String phone, String password, String uuid, String channelCode);
+    String createUser(String phone, String password, String uuid, String channelCode, HttpServletRequest request);
 
     /**
      * 获取用户权限信息
@@ -91,4 +93,6 @@ public interface HxUserService {
     List<HxAuthorityDto> mapToGrantedAuthorities(HxUserDto user);
 
 //    HxCustomer findCustomerOnline();
+
+    List<UserNumVO> statUserRegisterNum();
 }

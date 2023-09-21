@@ -24,4 +24,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 * @date 2019-08-24
 */
 public interface ChannelRepository extends JpaRepository<Channel, Long>, JpaSpecificationExecutor<Channel> {
+
+    Channel findByChannelCode(String channelCode);
 }

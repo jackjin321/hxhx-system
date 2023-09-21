@@ -193,11 +193,11 @@ public class ChannelServiceImpl implements ChannelService {
 //                return ResultBuilder.data(simpleMap);
             }
         }
-        Channel channelVO = optionalChannel.get();
+        Channel channel = optionalChannel.get();
 
         ChannelLog channelLog = new ChannelLog();
-        channelLog.setChannelId(channelVO.getId());//登录渠道
-        channelLog.setChannelName(channelVO.getChannelName());//登录渠道
+        channelLog.setChannelId(channel.getId());//登录渠道
+        channelLog.setChannelName(channel.getChannelName());//登录渠道
 
         channelLog.setUuid(uuid);
         channelLog.setAccessIp(realIp);
@@ -214,13 +214,13 @@ public class ChannelServiceImpl implements ChannelService {
 
         //渠道访问日志放到redis
 //        String channelToken = accessService.createChannelToken(channelLog, channelVO);
-        String abc = accessService.createChannelTokenV2(uuid, channelLog, channelVO);
+        String abc = accessService.createChannelTokenV2(uuid, channelLog, channel);
 
         JSONObject mapJson = new JSONObject();
-        mapJson.put("process", channelVO.getProcess());
+        mapJson.put("process", channel.getProcess());
         mapJson.put("token", abc);
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("process", channelVO.getProcess());
+        responseHeaders.set("process", channel.getProcess());
         return new ResponseEntity<>(ResultBuilder.data(mapJson), responseHeaders, HttpStatus.OK);
 //        return ResultBuilder.data(mapJson);
     }

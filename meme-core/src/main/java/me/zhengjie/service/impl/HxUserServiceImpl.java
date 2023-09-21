@@ -34,12 +34,14 @@ import me.zhengjie.service.mapstruct.HxUserLoginMapper;
 import me.zhengjie.service.mapstruct.HxUserMapper;
 import me.zhengjie.service.mapstruct.HxUserV2Mapper;
 import me.zhengjie.utils.*;
+import me.zhengjie.vo.UserNumVO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -67,9 +69,19 @@ public class HxUserServiceImpl implements HxUserService {
     private final ChannelLogRepository channelLogRepository;
 
     @Override
+    public List<UserNumVO> statUserRegisterNum() {
+        return hxUserRepository.statUserRegisterNum();
+    }
+
+    @Override
     public Map<String, Object> queryAll(HxUserQueryCriteria criteria, Pageable pageable) {
         Page<HxUser> page = hxUserRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
-        return PageUtil.toPage(page.map(hxUserMapper::toDto));
+        return PageUtil.toPage(page.map(hxUserMapper::toDto).map(p -> {
+            if (ObjectUtil.isAllNotEmpty(p.getPhone())) {
+                p.setPhone(CommonUtil.signPhone(p.getPhone()));
+            }
+            return p;
+        }));
     }
 
     @Override
@@ -128,7 +140,7 @@ public class HxUserServiceImpl implements HxUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String createUser(String phone, String password, String uuid, String channelCode) {
+    public String createUser(String phone, String password, String uuid, String channelCode, HttpServletRequest request) {
         if (ObjectUtil.isAllEmpty(channelCode)) {
             channelCode = "88888888";
         }
@@ -148,7 +160,7 @@ public class HxUserServiceImpl implements HxUserService {
         } else {
             //异常
         }
-        if(ObjectUtil.isAllEmpty(channelObject)){
+        if (ObjectUtil.isAllEmpty(channelObject)) {
             throw new BadRequestException("请求异常");
         }
         //ChannelLog channelLog = new ChannelLog();
@@ -173,7 +185,7 @@ public class HxUserServiceImpl implements HxUserService {
 //            channelLog.setUserId(hxUser.getUserId());
 //            channelLog.setIsRegister(true);
 //            channelLog.setIsLogin(true);
-            channelLogRepository.updateSubCntById(hxUser.getUserId(),true,true, channelObject.getChannelLogId());
+            channelLogRepository.updateSubCntById(hxUser.getUserId(), true, true, channelObject.getChannelLogId());
             //新用户
             //throw new EntityNotFoundException(HxUser.class, "phone", phone);
 //            return AccessEventEnum.REGISTER.getCode();
@@ -183,7 +195,7 @@ public class HxUserServiceImpl implements HxUserService {
 //            channelLog.setIsRegister(false);
 //            channelLog.setIsLogin(true);
 //            channelLogRepository.save(channelLog);
-            channelLogRepository.updateSubCntById(user.getUserId(),false,true, channelObject.getChannelLogId());
+            channelLogRepository.updateSubCntById(user.getUserId(), false, true, channelObject.getChannelLogId());
 
         }
         //更新日志

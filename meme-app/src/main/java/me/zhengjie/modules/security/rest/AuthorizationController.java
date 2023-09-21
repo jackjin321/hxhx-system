@@ -45,10 +45,7 @@ import me.zhengjie.service.dto.HxJwtUserDto;
 import me.zhengjie.service.dto.HxUserDto;
 import me.zhengjie.service.dto.HxUserDtoV2;
 import me.zhengjie.service.mapstruct.HxUserMapper;
-import me.zhengjie.utils.RedisUtils;
-import me.zhengjie.utils.RsaUtils;
-import me.zhengjie.utils.SecurityUtils;
-import me.zhengjie.utils.StringUtils;
+import me.zhengjie.utils.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -112,8 +109,8 @@ public class AuthorizationController {
         authUser.setPassword("1234");
         String channelCode = request.getHeader("channel-code");
         String uuid = request.getHeader("uuid");
-        log.info("{} {} {} {}", authUser.getUsername(), authUser.getPassword(), uuid, channelCode);
-        String userAction = hxUserService.createUser(authUser.getUsername(), authUser.getPassword(), uuid, channelCode);
+        log.info("用户登录 {} {} {} {}", authUser.getUsername(), authUser.getPassword(), uuid, channelCode);
+        String userAction = hxUserService.createUser(authUser.getUsername(), authUser.getPassword(), uuid, channelCode, request);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
@@ -151,6 +148,8 @@ public class AuthorizationController {
     public ResponseEntity<HxUserDtoV2> getUserInfo() {
         Long userId = SecurityUtils.getCurrentUserIdByApp();
         HxUserDtoV2 hxUserDto = hxUserService.findByIdV2(userId);
+        hxUserDto.setPhone(CommonUtil.signPhone(hxUserDto.getPhone()));
+        hxUserDto.setUsername(CommonUtil.signPhone(hxUserDto.getUsername()));
         log.info("auth/info {} {}", userId, JSONObject.toJSON(hxUserDto));
         return ResponseEntity.ok(hxUserDto);
     }

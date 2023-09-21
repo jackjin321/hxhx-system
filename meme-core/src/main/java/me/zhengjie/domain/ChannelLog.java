@@ -60,9 +60,9 @@ public class ChannelLog extends XFBaseEntity  implements Comparable<ChannelLog> 
         if (StringUtil.isEmpty(this.accessIp) && StringUtil.isEmpty(o.accessIp)) {
             return 0;
         }
-        if (StringUtil.isEmpty(this.accessIp) || StringUtil.isEmpty(o.accessIp)) {
-            return 1;
-        }
+//        if (StringUtil.isEmpty(this.accessIp) || StringUtil.isEmpty(o.accessIp)) {
+//            return 1;
+//        }
 
 
 //        if (o.getIp().equals(this.ip) && this.getOsName().equals(o.getOsName()) && this.getOsId().equals(this.osId)) {

@@ -21,6 +21,14 @@ CREATE TABLE `xf_banner` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT COMMENT='广告位管理';
 
+alter table `xf_channel_chart`
+add column `for_c_register` bigint NOT NULL COMMENT '渠道注册' after register_num;
+
+alter table `xf_channel_chart`
+add column  `ip_pv` bigint DEFAULT '0' COMMENT 'IPPV' after today_uv;
+alter table `xf_channel_chart`
+add column `ip_uv` bigint DEFAULT '0' COMMENT 'IPUV' after ip_pv;
+
 DROP TABLE IF EXISTS `xf_channel_chart`;
 CREATE TABLE `xf_channel_chart` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -30,9 +38,12 @@ CREATE TABLE `xf_channel_chart` (
   `price_type` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '价格类型 uv, cpa',
   `login_num` bigint NOT NULL COMMENT '总登录数（包含新老户）',
   `register_num` bigint NOT NULL COMMENT '新户注册',
+  `for_c_register` bigint NOT NULL COMMENT '渠道注册',
   `old_login_num` bigint NOT NULL COMMENT '老户登录',
   `today_pv` bigint NOT NULL COMMENT '渠道PV',
    `today_uv` bigint NOT NULL COMMENT '渠道UV',
+       `ip_pv` bigint NOT NULL COMMENT 'IPPV',
+    `ip_uv` bigint NOT NULL COMMENT 'IPUV',
    `new_product_uv` bigint NOT NULL COMMENT '今日UV',
    `old_product_uv` bigint NOT NULL COMMENT '今日UV',
    `new_product_rate` decimal(10,4) unsigned NOT NULL DEFAULT '0.0000' COMMENT '产品单价',
@@ -60,8 +71,8 @@ CREATE TABLE `xf_product_chart` (
   `banner_name` varchar(512) NOT NULL COMMENT '产品名称',
   `today_pv` bigint NOT NULL COMMENT '今日PV',
    `today_uv` bigint NOT NULL COMMENT '今日UV',
-    `ip_pv` bigint NOT NULL COMMENT '今日UV',
-    `ip_uv` bigint NOT NULL COMMENT '产品Id',
+    `ip_pv` bigint NOT NULL COMMENT 'IPPV',
+    `ip_uv` bigint NOT NULL COMMENT 'IPUV',
     `first_to` bigint NOT NULL COMMENT '首次访问',
 
   `create_by` varchar(255) DEFAULT NULL COMMENT '创建者',
@@ -77,6 +88,9 @@ add column `port_status` varchar(255) DEFAULT NULL COMMENT 'AB面，A，B' after
 alter table `xf_channel`
 add column `price_type` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '价格类型 uv, cpa' after auth_status;
 
+alter table `xf_channel`
+add column `register_buckle_rate` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '注册扣量比率' after process;
+
 DROP TABLE IF EXISTS `xf_channel`;
 CREATE TABLE `xf_channel` (
   `channel_id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -84,6 +98,7 @@ CREATE TABLE `xf_channel` (
   `channel_code` varchar(255) DEFAULT NULL COMMENT '渠道编码',
   `port_status` varchar(255) DEFAULT NULL COMMENT 'AB面，A，B',
   `process` varchar(255) DEFAULT NULL COMMENT '流程控制',
+  `register_buckle_rate` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '注册扣量比率',
   `auth_status` varchar(255) DEFAULT NULL COMMENT '二要素开关，on开启，off关闭',
   `price_type` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '价格类型 uv, cpa',
   `price` decimal(10,4) unsigned NOT NULL DEFAULT '0.0000' COMMENT '单价',

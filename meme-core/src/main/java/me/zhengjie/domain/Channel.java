@@ -23,6 +23,7 @@ import lombok.Setter;
 import me.zhengjie.base.BaseEntity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -51,7 +52,19 @@ public class Channel extends BaseEntity implements Serializable {
     private String portStatus;//AB面，A，B
     private Integer sort;
     private String channelRemarks;
+    /**
+     * 注册扣量比率
+     */
+    @NotNull
+    private String registerBuckleRate;
 
+
+
+    /**
+     * 进件扣量比例
+     */
+//    @NotNull
+//    private String intoBuckleRate;
 
     public void copy(Channel source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));

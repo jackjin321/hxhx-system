@@ -1,10 +1,12 @@
 package me.zhengjie.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.domain.ProductLog;
 import me.zhengjie.repository.ProductLogRepository;
 import me.zhengjie.service.ProductLogService;
 import me.zhengjie.service.dto.AppQueryCriteria;
+import me.zhengjie.utils.CommonUtil;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 import org.springframework.data.domain.Page;
@@ -20,7 +22,12 @@ public class ProductLogServiceImpl implements ProductLogService {
     @Override
     public Object queryAll(AppQueryCriteria criteria, Pageable pageable) {
         Page<ProductLog> page = productLogRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
-        return PageUtil.toPage(page);
+        return PageUtil.toPage(page.map(p -> {
+            if (ObjectUtil.isAllNotEmpty(p.getPhone())) {
+                p.setPhone(CommonUtil.signPhone(p.getPhone()));
+            }
+            return p;
+        }));
     }
 
 }

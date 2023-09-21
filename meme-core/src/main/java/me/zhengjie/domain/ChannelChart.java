@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.*;
 import me.zhengjie.base.XFBaseEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.math.BigDecimal;
@@ -62,6 +63,10 @@ public class ChannelChart extends XFBaseEntity {
      */
     private Long todayUv;
 
+    private Long ipPv;
+
+    private Long ipUv;
+
     /**
      * 总登录数（包含新老户）
      */
@@ -76,6 +81,8 @@ public class ChannelChart extends XFBaseEntity {
      */
     private Long oldLoginNum;
 
+    @Column(name = "for_c_register", length = 20)
+    private Long forCRegister;
 
 
     /**

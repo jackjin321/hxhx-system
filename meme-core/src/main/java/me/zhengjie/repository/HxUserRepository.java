@@ -16,6 +16,7 @@
 package me.zhengjie.repository;
 
 import me.zhengjie.domain.HxUser;
+import me.zhengjie.vo.UserNumVO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -44,4 +45,7 @@ public interface HxUserRepository extends JpaRepository<HxUser, Long>, JpaSpecif
      * @return /
      */
     HxUser findByPhone(String phone);
+
+    @Query(value = "select count(user_id) num, date_format(create_time,'%y%m%d') mday  from hx_user group by mday", nativeQuery = true)
+    List<UserNumVO> statUserRegisterNum();
 }

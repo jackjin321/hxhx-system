@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.annotation.Log;
 import me.zhengjie.domain.Channel;
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.service.ChannelService;
 import me.zhengjie.service.dto.AppQueryCriteria;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +52,9 @@ public class ChannelController {
     @PostMapping
 //    @PreAuthorize("@el.check('channel:add')")
     public ResponseEntity<Object> createApp(@Validated @RequestBody Channel resources) {
+        if (verifyBuckle(resources)) {
+            throw new BadRequestException("RegisterBuckleRate is out of limits");
+        }
         channelService.create(resources);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -59,6 +63,9 @@ public class ChannelController {
     @PutMapping
 //    @PreAuthorize("@el.check('channel:edit')")
     public ResponseEntity<Object> updateApp(@Validated @RequestBody Channel resources) {
+        if (verifyBuckle(resources)) {
+            throw new BadRequestException("RegisterBuckleRate is out of limits");
+        }
         channelService.update(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -68,7 +75,25 @@ public class ChannelController {
     @DeleteMapping
 //    @PreAuthorize("@el.check('product:del')")
     public ResponseEntity<Object> deleteApp(@RequestBody Set<Long> ids) {
+        if(ids.contains(1L) || ids.contains(13L) || ids.contains(8L)){
+            throw new BadRequestException("禁止删除APP渠道信息");
+        }
         channelService.delete(ids);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    /**
+     * 检验 注册扣量比率 or 进件扣量比例 or 单价
+     *
+     * @param channel channel
+     * @return boolean
+     */
+    private boolean verifyBuckle(Channel channel) {
+        double reg = Double.parseDouble(channel.getRegisterBuckleRate());
+//        double into = Double.parseDouble(channel.getIntoBuckleRate());
+
+//        return ((reg > 1 || reg < 0) || (into > 1 || into < 0));
+        return (reg > 1 || reg < 0);
     }
 }

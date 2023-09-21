@@ -1,6 +1,7 @@
 package me.zhengjie.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.access.DateUtils;
 import me.zhengjie.domain.*;
@@ -14,6 +15,8 @@ import me.zhengjie.service.dto.ChannelQueryCriteria;
 import me.zhengjie.service.dto.AppQueryCriteria;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
+import me.zhengjie.vo.ChannelLogVO;
+import me.zhengjie.vo.ProductLogVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,18 +52,23 @@ public class ChannelChartServiceImpl implements ChannelChartService {
 
         totalChart.setTodayUv(Long.valueOf("0"));
         totalChart.setTodayPv(Long.valueOf("0"));
-//        totalChart.setTodayRegister(Long.valueOf("0"));
+        totalChart.setRegisterNum(Long.valueOf("0"));
         totalChart.setProductPv(Long.valueOf("0"));
         totalChart.setProductUv(Long.valueOf("0"));
 
         Map<Long, BigDecimal> productMap = productRepository.findAll().stream().collect(Collectors.toMap(Product::getId, Product::getPrice));
 
-
+        Date ddd = new Date();//当天结算
+        Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
+        Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
         channelList.forEach(item -> {
-            ChannelChart channelChart = createChart(localDate, item, productMap);
+            ChannelChart channelChart = createChart(startTime, endTime, item, productMap);
 
             totalChart.setTodayPv(totalChart.getTodayPv() + channelChart.getTodayPv());
             totalChart.setTodayUv(totalChart.getTodayUv() + channelChart.getTodayUv());
+            totalChart.setRegisterNum(totalChart.getRegisterNum() + channelChart.getRegisterNum());
+            totalChart.setProductPv(totalChart.getProductPv() + channelChart.getProductPv());
+            totalChart.setProductUv(totalChart.getProductUv() + channelChart.getProductUv());
 //            totalChart.setTodayRegister(totalChart.getTodayRegister() + channelChart.getTodayRegister());
 
         });
@@ -76,10 +84,16 @@ public class ChannelChartServiceImpl implements ChannelChartService {
     @Override
     public Map<String, Object> findByQueryToday(ChannelQueryCriteria criteria, Pageable pageable) {
         Page<Channel> channelPage = channelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
-        LocalDate localDate = DateUtils.nowLocalDate();
+//        LocalDate localDate = DateUtils.nowLocalDate();
+        Date ddd = new Date();//当天结算
+        Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
+        Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
         Map<Long, BigDecimal> productMap = productRepository.findAll().stream().collect(Collectors.toMap(Product::getId, Product::getPrice));
+        Page<ChannelChart> channelChartPage = channelPage.map(p -> createChart(startTime, endTime, p, productMap));
 
-        return PageUtil.toPage(channelPage.map(p -> createChart(localDate, p, productMap)));
+        return PageUtil.toPage(channelChartPage.toList().stream().sorted(Comparator.comparing(ChannelChart::getTodayUv,
+                Comparator.reverseOrder())).collect(Collectors.toList()),
+                channelChartPage.getTotalElements());
     }
 
     @Override
@@ -88,42 +102,113 @@ public class ChannelChartServiceImpl implements ChannelChartService {
         return PageUtil.toPage(page);
     }
 
-    public ChannelChart createChart(LocalDate localDate, Channel channel,
+    @Override
+    public ChannelChart createChart(Timestamp startTime, Timestamp endTime, Channel channel,
                                     Map<Long, BigDecimal> productPriceMap) {
 
         AppQueryCriteria criteria = new AppQueryCriteria();
         List<Timestamp> abc = new ArrayList<>();
-        Date ddd = new Date();//当天结算
-//        Timestamp startTime = new Timestamp(DateUtil.offsetDay(ddd, -5).getTime());
-        Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
-        Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
+
         abc.add(startTime);
         abc.add(endTime);
         criteria.setCreateTime(abc);
         criteria.setChannelId(channel.getId());
 
         List<ChannelLog> channelLogs = channelLogService.queryAllV2(criteria);//PV统计
-        Set<ChannelLog> channelLogSet = new TreeSet<>(channelLogs);//UV统计
-        long todayRegister = channelLogs.stream().filter(p -> p.getIsRegister()).count();//注册数
+        //Set<ChannelLog> channelLogSet = new TreeSet<>(channelLogs);//UV统计
+//        long todayRegister = channelLogs.stream().filter(p -> p.getIsRegister()).count();//注册数
+        List<ChannelLogVO> channelLogVOList = channelLogs.stream().map(p->{
+            ChannelLogVO channelLogVO = new ChannelLogVO();
+            channelLogVO.setUuid(p.getUuid());
+            channelLogVO.setAccessIp(p.getAccessIp());
+            return channelLogVO;
+        }).distinct().collect(Collectors.toList());
+
+
+        List<String> accessIps = channelLogs.stream().map(ChannelLog::getAccessIp).collect(Collectors.toList());
+        List<String> abcIps = accessIps.stream().distinct().collect(Collectors.toList());
 
         ChannelChart channelChart = new ChannelChart();
+
+        channelChart.setIpPv(Long.valueOf(accessIps.size()));
+        channelChart.setIpUv(Long.valueOf(abcIps.size()));
+        channelChart.setPrice(channel.getPrice());
+        channelChart.setPriceType(channel.getPriceType());
         channelChart.setChannelId(channel.getId());
         channelChart.setChannelName(channel.getChannelName());
-        channelChart.setTodayUv(Long.valueOf(channelLogSet.size()));//UV统计
+//        channelChart.setTodayUv(Long.valueOf(channelLogSet.size()));//UV统计
+        channelChart.setTodayUv(Long.valueOf(channelLogVOList.size()));//UV统计
         channelChart.setTodayPv(Long.valueOf(channelLogs.size()));//PV统计
-//        channelChart.setTodayRegister(todayRegister);
-//
-//
-//        List<ProductLog> promoteLogList = promoteLogList(criteria, channel);//产品点击日志
-//        Set<ProductLog> promoteLogSet = new TreeSet<>(promoteLogList);
-//        long firstTo = promoteLogList.stream().filter(p -> p.getIsFirstTo()).count();
-//
-//        //注册率=注册数/uv数
-//        //产出值=产出uv/uv数
-//        channelChart.setProductPv(Long.valueOf(promoteLogList.size()));//产品PV
-//        channelChart.setProductUv(Long.valueOf(promoteLogSet.size()));//产品UV，渠道到产品UV
-//        channelChart.setProductFirstTo(firstTo);
 
+        long todayRegister = channelLogs.stream().filter(p -> {
+            if (ObjectUtil.isNotEmpty(p.getIsRegister())) {
+                return p.getIsRegister();
+            } else {
+                return false;
+            }
+        }).map(pp -> pp.getUserId()).distinct().count();
+
+        long todayOldLogin = channelLogs.stream().filter(p -> {
+            if (ObjectUtil.isAllNotEmpty(p.getIsRegister(), p.getIsLogin())) {
+                return !p.getIsRegister() && p.getIsLogin();
+            } else {
+                return false;
+            }
+        }).map(pp -> pp.getUserId()).distinct().count();
+        long todayAllLogin = channelLogs.stream().filter(p -> {
+            if (ObjectUtil.isNotEmpty(p.getIsLogin())) {
+                return p.getIsLogin();
+            } else {
+                return false;
+            }
+        }).map(pp -> pp.getUserId()).distinct().count();
+
+        channelChart.setLoginNum(Long.valueOf(todayAllLogin));//总登录数（包含新老户）
+        channelChart.setRegisterNum(todayRegister);
+        Long forCRegister = multiply(todayRegister, channel.getRegisterBuckleRate());
+        channelChart.setForCRegister(forCRegister);
+        channelChart.setOldLoginNum(todayOldLogin);
+        List<ProductLog> promoteLogList = promoteLogList(criteria, channel);//产品点击日志
+        Set<ProductLog> promoteLogSet = new TreeSet<>(promoteLogList);
+        long newProductUv = promoteLogList.stream().filter(p -> {
+            if (ObjectUtil.isNotEmpty(p.getUserStatus())) {
+                return p.getUserStatus().equals("new");
+            } else {
+                return false;
+            }
+        }).map(pp -> pp.getUserId()).distinct().count();
+        long oldProductUv = promoteLogList.stream().filter(p -> {
+            if (ObjectUtil.isNotEmpty(p.getUserStatus())) {
+                return p.getUserStatus().equals("old");
+            } else {
+                return true;
+            }
+        }).map(pp -> pp.getUserId()).distinct().count();
+        channelChart.setNewProductUv(newProductUv);
+        channelChart.setOldProductUv(oldProductUv);
+        if (todayRegister > 0L) {
+            channelChart.setNewProductRate(new BigDecimal(newProductUv).multiply(new BigDecimal("100")).divide(new BigDecimal(todayRegister), 2, BigDecimal.ROUND_HALF_UP));
+        } else {
+            channelChart.setNewProductRate(BigDecimal.ZERO);
+        }
+        if (todayOldLogin > 0L) {
+            channelChart.setOldProductRate(new BigDecimal(oldProductUv).multiply(new BigDecimal("100")).divide(new BigDecimal(todayOldLogin), 2, BigDecimal.ROUND_HALF_UP));
+        } else {
+            channelChart.setOldProductRate(BigDecimal.ZERO);
+        }
+
+        channelChart.setProductPv(Long.valueOf(promoteLogList.size()));
+        channelChart.setProductUv(Long.valueOf(promoteLogSet.size()));
+        //产值逻辑改成 单价*uv数 / 产品uv数
+        if (promoteLogSet.size() > 0) {
+//            channelChart.setOutputValue(new BigDecimal(promoteLogSet.size()).multiply(new BigDecimal("100")).divide(new BigDecimal(channelLogSet.size()), 2, BigDecimal.ROUND_HALF_UP));
+            channelChart.setOutputValue(new BigDecimal(channelLogVOList.size())
+                    .multiply(channel.getPrice())
+//                    .multiply(new BigDecimal("100"))
+                    .divide(new BigDecimal(promoteLogSet.size()), 2, BigDecimal.ROUND_HALF_UP));
+        } else {
+            channelChart.setOutputValue(BigDecimal.ZERO);
+        }
 
         return channelChart;
     }
@@ -142,5 +227,20 @@ public class ChannelChartServiceImpl implements ChannelChartService {
         return productLogList;
     }
 
+    private long multiply(long total, String rate) {
+        BigDecimal bigDecimalTotal = BigDecimal.valueOf(total).multiply(new BigDecimal(rate));
+        return bigDecimalTotal.longValue();
+    }
 
+    public static void main(String[] args) {
+        Date ddd = new Date();//当天结算
+        Timestamp startTime1 = new Timestamp(DateUtil.beginOfDay(DateUtil.offsetDay(ddd, -1)).getTime());
+        Timestamp endTime1 = new Timestamp(DateUtil.endOfDay(DateUtil.offsetDay(ddd, -1)).getTime());
+        Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
+        Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
+        System.out.println(startTime);
+        System.out.println(endTime);
+        System.out.println(startTime1);
+        System.out.println(endTime1);
+    }
 }

@@ -27,6 +27,7 @@ import java.util.List;
 @Data
 public class AppQueryCriteria{
 
+	private String spaceId;
 	@Query(type = Query.Type.EQUAL)
 	private Long channelId;
 
@@ -42,6 +43,10 @@ public class AppQueryCriteria{
 
 	@Query(type = Query.Type.INNER_LIKE)
 	private String phone;
+	@Query(type = Query.Type.INNER_LIKE)
+	private String productName;
+	@Query(type = Query.Type.INNER_LIKE)
+	private String channelName;
 
 	@Query(type = Query.Type.BETWEEN)
 	private List<Timestamp> createTime;
