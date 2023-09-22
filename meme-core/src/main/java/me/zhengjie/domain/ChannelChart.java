@@ -3,12 +3,14 @@ package me.zhengjie.domain;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import me.zhengjie.base.XFBaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 /**
@@ -118,4 +120,8 @@ public class ChannelChart extends XFBaseEntity {
      * 产出值=产出uv/uv数
      */
     private BigDecimal outputValue;
+
+
+    @Transient
+    private BigDecimal totalCost;
 }

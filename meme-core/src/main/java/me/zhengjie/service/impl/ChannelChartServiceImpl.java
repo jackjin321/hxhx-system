@@ -55,21 +55,25 @@ public class ChannelChartServiceImpl implements ChannelChartService {
         totalChart.setRegisterNum(Long.valueOf("0"));
         totalChart.setProductPv(Long.valueOf("0"));
         totalChart.setProductUv(Long.valueOf("0"));
+        totalChart.setTotalCost(BigDecimal.ZERO);
 
         Map<Long, BigDecimal> productMap = productRepository.findAll().stream().collect(Collectors.toMap(Product::getId, Product::getPrice));
-
+        //final BigDecimal totalCost = BigDecimal.ZERO;
         Date ddd = new Date();//当天结算
         Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
         Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
         channelList.forEach(item -> {
             ChannelChart channelChart = createChart(startTime, endTime, item, productMap);
-
-            totalChart.setTodayPv(totalChart.getTodayPv() + channelChart.getTodayPv());
-            totalChart.setTodayUv(totalChart.getTodayUv() + channelChart.getTodayUv());
+            if (!item.getId().equals(1L) && !item.getId().equals(8L) && !item.getId().equals(13L)) {
+                totalChart.setTodayPv(totalChart.getTodayPv() + channelChart.getTodayPv());
+                totalChart.setTodayUv(totalChart.getTodayUv() + channelChart.getTodayUv());
+                totalChart.setTotalCost(totalChart.getTotalCost().add(item.getPrice().multiply(new BigDecimal(channelChart.getTodayUv()))));
+//            totalChart.setTodayRegister(totalChart.getTodayRegister() + channelChart.getTodayRegister());
+            } else {
+            }
             totalChart.setRegisterNum(totalChart.getRegisterNum() + channelChart.getRegisterNum());
             totalChart.setProductPv(totalChart.getProductPv() + channelChart.getProductPv());
             totalChart.setProductUv(totalChart.getProductUv() + channelChart.getProductUv());
-//            totalChart.setTodayRegister(totalChart.getTodayRegister() + channelChart.getTodayRegister());
 
         });
 
@@ -77,7 +81,11 @@ public class ChannelChartServiceImpl implements ChannelChartService {
 //        ProductChart totalProductChart = pro.todayTotalList();
 //        totalChart.setProductUv(totalProductChart.getTodayPv());
 //        totalChart.setProductUv(totalProductChart.getTodayUv());
-
+        if (totalChart.getProductUv() > 0L) {
+            totalChart.setOutputValue(totalChart.getTotalCost().divide(new BigDecimal(totalChart.getProductUv()), 2, BigDecimal.ROUND_HALF_UP));
+        } else {
+            totalChart.setOutputValue(BigDecimal.ZERO);
+        }
         return totalChart;
     }
 
@@ -117,7 +125,7 @@ public class ChannelChartServiceImpl implements ChannelChartService {
         List<ChannelLog> channelLogs = channelLogService.queryAllV2(criteria);//PV统计
         //Set<ChannelLog> channelLogSet = new TreeSet<>(channelLogs);//UV统计
 //        long todayRegister = channelLogs.stream().filter(p -> p.getIsRegister()).count();//注册数
-        List<ChannelLogVO> channelLogVOList = channelLogs.stream().map(p->{
+        List<ChannelLogVO> channelLogVOList = channelLogs.stream().map(p -> {
             ChannelLogVO channelLogVO = new ChannelLogVO();
             channelLogVO.setUuid(p.getUuid());
             channelLogVO.setAccessIp(p.getAccessIp());
