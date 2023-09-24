@@ -124,6 +124,9 @@ add column `price` decimal(10,4) unsigned NOT NULL DEFAULT '0.0000' COMMENT '单
 alter table xf_channel
 add column `auth_status` varchar(255) DEFAULT NULL COMMENT '二要素开关，on开启，off关闭' after process;
 
+alter table xf_channel
+add column   `recycle` tinyint default '0' COMMENT '回收 0 1已回收' after sort;
+
 DROP TABLE IF EXISTS `xf_channel`;
 CREATE TABLE `xf_channel` (
   `channel_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -133,6 +136,7 @@ CREATE TABLE `xf_channel` (
   `process` varchar(255) DEFAULT NULL COMMENT '流程控制',
   `auth_status` varchar(255) DEFAULT NULL COMMENT '二要素开关，on开启，off关闭',
   `sort` int default NULL COMMENT '排序，数字倒序',
+  `recycle` tinyint default '0' COMMENT '回收 0 1已回收',
   `channel_remarks` text  default NULL COMMENT '渠道描述',
 
   `create_by` varchar(255) DEFAULT NULL COMMENT '创建者',
@@ -145,6 +149,11 @@ CREATE TABLE `xf_channel` (
 alter table xf_channel_log
 add column `uuid` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'uuid' after user_id;
 
+alter table xf_channel_log
+add column `reg_channel_id` bigint DEFAULT 0 COMMENT '渠道Id' after phone_md5;
+alter table xf_channel_log
+add column `reg_channel_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '渠道名称' after reg_channel_id;
+
 DROP TABLE IF EXISTS `xf_channel_log`;
 CREATE TABLE `xf_channel_log` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -152,6 +161,8 @@ CREATE TABLE `xf_channel_log` (
   `uuid` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'uuid',
   `phone` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '手机号',
   `phone_md5` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '手机号Md5',
+   `reg_channel_id` bigint DEFAULT 0 COMMENT '渠道Id',
+  `reg_channel_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '渠道名称',
   `channel_id` bigint NOT NULL COMMENT '渠道Id',
   `channel_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '渠道名称',
   `platform` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '平台类型，app，h5',

@@ -167,7 +167,7 @@ public class HxUserServiceImpl implements HxUserService {
         //channelLog.setId(channelObject.getChannelLogId());
         HxUser user = hxUserRepository.findByPhone(phone);
         if (user == null) {
-
+            //注册
             HxUser hxUser = new HxUser();
             hxUser.setChannelId(channelObject.getChannelId());//注册渠道
             hxUser.setChannelName(channelObject.getChannelName());//注册渠道
@@ -185,7 +185,7 @@ public class HxUserServiceImpl implements HxUserService {
 //            channelLog.setUserId(hxUser.getUserId());
 //            channelLog.setIsRegister(true);
 //            channelLog.setIsLogin(true);
-            channelLogRepository.updateSubCntById(hxUser.getUserId(), true, true, channelObject.getChannelLogId());
+            channelLogRepository.updateSubCntById(hxUser.getUserId(), channelObject.getChannelId(), channelObject.getChannelName(), true, true, channelObject.getChannelLogId());
             //新用户
             //throw new EntityNotFoundException(HxUser.class, "phone", phone);
 //            return AccessEventEnum.REGISTER.getCode();
@@ -195,7 +195,7 @@ public class HxUserServiceImpl implements HxUserService {
 //            channelLog.setIsRegister(false);
 //            channelLog.setIsLogin(true);
 //            channelLogRepository.save(channelLog);
-            channelLogRepository.updateSubCntById(user.getUserId(), false, true, channelObject.getChannelLogId());
+            channelLogRepository.updateSubCntById(user.getUserId(), user.getChannelId(), user.getChannelName(), false, true, channelObject.getChannelLogId());
 
         }
         //更新日志

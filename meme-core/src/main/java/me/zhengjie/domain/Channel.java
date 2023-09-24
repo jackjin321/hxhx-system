@@ -51,6 +51,7 @@ public class Channel extends BaseEntity implements Serializable {
     private String authStatus;//二要素开关，on开启，off关闭
     private String portStatus;//AB面，A，B
     private Integer sort;
+    private Boolean recycle;
     private String channelRemarks;
     /**
      * 注册扣量比率

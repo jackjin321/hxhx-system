@@ -226,6 +226,20 @@ public class BannerServiceImpl implements BannerService {
     @Override
     public ResultModel toProductUrlV2(ParamBannerQuery paramBanner) {
         Long userId = SecurityUtils.getCurrentUserIdByApp();
+
+
+        Long regChannelId = SecurityUtils.getRegChannelIdByApp();
+        String regChannelName = SecurityUtils.getRegChannelNameByApp();
+        Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
+        Channel channel = null;
+        if (channelOptional.isPresent()) {
+            System.out.println("//注册渠道");
+            channel = channelOptional.get();//注册渠道
+        } else {
+            System.out.println("//登录渠道");
+            channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());;//登录渠道
+        }
+
         Optional<Product> productOptional = productRepository.findById(paramBanner.getProductId());
         //product.setSpaceId(spaceId);    @Override
         if (productOptional.isPresent()) {
@@ -236,7 +250,7 @@ public class BannerServiceImpl implements BannerService {
             JSONObject dataMap = new JSONObject();
             dataMap.put("url", product.getApplyLink());
 
-            Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
+            //Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
             insertProductLog(userId, product, channel, paramBanner);
             return ResultBuilder.data(dataMap);
         } else {
@@ -247,7 +261,18 @@ public class BannerServiceImpl implements BannerService {
     @Override
     public ResultModel findOne(ParamBannerQuery paramBanner) {
         Long userId = SecurityUtils.getCurrentUserIdByApp();
-        Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
+        Long regChannelId = SecurityUtils.getRegChannelIdByApp();
+        String regChannelName = SecurityUtils.getRegChannelNameByApp();
+        Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
+        Channel channel = null;
+        if (channelOptional.isPresent()) {
+            System.out.println("//注册渠道");
+            channel = channelOptional.get();//注册渠道
+        } else {
+            System.out.println("//登录渠道");
+            channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());;//登录渠道
+        }
+//        Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
         if (ObjectUtil.isNotEmpty(productList) && productList.size() > 0) {
             Product product = productList.get(0);

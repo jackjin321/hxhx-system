@@ -29,6 +29,6 @@ public interface ChannelLogRepository extends JpaRepository<ChannelLog, Long>, J
 
 
     @Modifying
-    @Query(value = " update xf_channel_log set user_id = ?1,is_register = ?2, is_login = ?3 where id = ?4 ", nativeQuery = true)
-    void updateSubCntById(Long userId, Boolean isRegister, Boolean isLogin, Long id);
+    @Query(value = " update xf_channel_log set user_id = ?1,reg_channel_id  = ?2, reg_channel_name = ?3 ,is_register = ?4, is_login = ?5 where id = ?6 ", nativeQuery = true)
+    void updateSubCntById(Long userId, Long regChannelId, String regChannelName, Boolean isRegister, Boolean isLogin, Long id);
 }

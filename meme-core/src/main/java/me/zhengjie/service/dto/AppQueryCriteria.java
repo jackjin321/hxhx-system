@@ -28,8 +28,11 @@ import java.util.List;
 public class AppQueryCriteria{
 
 	private String spaceId;
+
 	@Query(type = Query.Type.EQUAL)
 	private Long channelId;
+	@Query(type = Query.Type.EQUAL)
+	private Long regChannelId;
 
 	@Query(type = Query.Type.EQUAL)
 	private Long productId;

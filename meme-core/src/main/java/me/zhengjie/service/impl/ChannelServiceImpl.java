@@ -173,6 +173,8 @@ public class ChannelServiceImpl implements ChannelService {
                 ChannelLog channelLog = new ChannelLog();
                 channelLog.setChannelId(channel.getId());//登录渠道
                 channelLog.setChannelName(channel.getChannelName());//登录渠道
+                channelLog.setRegChannelId(channel.getId());//登录渠道
+                channelLog.setRegChannelName(channel.getChannelName());//登录渠道
 
                 channelLog.setUuid(uuid);
                 channelLog.setAccessIp(realIp);
@@ -198,7 +200,8 @@ public class ChannelServiceImpl implements ChannelService {
         ChannelLog channelLog = new ChannelLog();
         channelLog.setChannelId(channel.getId());//登录渠道
         channelLog.setChannelName(channel.getChannelName());//登录渠道
-
+        channelLog.setRegChannelId(channel.getId());//登录渠道
+        channelLog.setRegChannelName(channel.getChannelName());//登录渠道
         channelLog.setUuid(uuid);
         channelLog.setAccessIp(realIp);
 

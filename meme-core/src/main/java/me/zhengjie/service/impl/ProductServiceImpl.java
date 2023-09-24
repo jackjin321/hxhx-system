@@ -22,6 +22,7 @@ import me.zhengjie.config.FileProperties;
 import me.zhengjie.domain.Channel;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.domain.Product;
+import me.zhengjie.repository.ChannelRepository;
 import me.zhengjie.repository.ProductRepository;
 import me.zhengjie.service.ChannelService;
 import me.zhengjie.service.IAccessService;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
+    private final ChannelRepository channelRepository;
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final FileProperties properties;
@@ -106,20 +108,24 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDto> queryList(AppQueryCriteria criteria, HttpServletRequest request) {
-        String channelCode = request.getHeader("channel-code");
+        String channelCode = request.getHeader("channel-code");//登录渠道编号
         String uuid = request.getHeader("uuid");
-        Channel channel = channelService.getChannelInfo(channelCode, uuid);
+        Long regChannelId = SecurityUtils.getRegChannelIdByApp();
+        String regChannelName = SecurityUtils.getRegChannelNameByApp();
+        Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
+        Channel channel = null;
+        if (channelOptional.isPresent()) {
+            System.out.println("//注册渠道");
+            channel = channelOptional.get();//注册渠道
+        } else {
+            System.out.println("//登录渠道");
+            channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
+        }
+//        Channel channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
         System.out.println(channel);
         criteria.setPortStatus(channel.getPortStatus());
         criteria.setStatus("onShelves");
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
-//        if (ObjectUtil.isNotEmpty(productList)) {
-//            if (productList.size() > 1) {
-//
-//            } else {
-//
-//            }
-//        }
         return productMapper.toDto(productList).stream().map(p -> {
             p.setApplyNum(this.getApplyNum(p.getId().toString()));
             return p;

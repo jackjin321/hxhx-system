@@ -25,8 +25,10 @@ public class ChannelLog extends XFBaseEntity  implements Comparable<ChannelLog> 
     private String phoneMd5;
 
     private Long channelId;
+    private Long regChannelId;//注册渠道
 
     private String channelName;
+    private String regChannelName;//注册渠道
 
     private String platform;
 

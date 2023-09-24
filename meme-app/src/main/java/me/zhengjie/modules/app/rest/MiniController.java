@@ -16,6 +16,7 @@ import me.zhengjie.service.ChannelService;
 import me.zhengjie.service.ProductService;
 import me.zhengjie.service.dto.AppQueryCriteria;
 import me.zhengjie.utils.IPUtils;
+import me.zhengjie.utils.SecurityUtils;
 import me.zhengjie.vo.MemberAuth;
 import me.zhengjie.vo.ParamBannerQuery;
 import org.springframework.data.domain.Pageable;
@@ -134,10 +135,12 @@ public class MiniController {
      */
     @GetMapping(value = "/product/list")
     public ResponseEntity<Object> productList(AppQueryCriteria criteria, Pageable pageable, HttpServletRequest request) {
+        //Long userId = SecurityUtils.getCurrentUserIdByApp();
         return new ResponseEntity<>(productService.queryList(criteria, request), HttpStatus.OK);
     }
 
     /**
+     * 废弃
      * 返回广告位列表
      *
      * @param criteria
@@ -150,6 +153,7 @@ public class MiniController {
     }
 
     /**
+     * 废弃
      * 随机返回一个广告位
      *
      * @param criteria

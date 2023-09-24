@@ -120,7 +120,8 @@ public class ChannelChartServiceImpl implements ChannelChartService {
         abc.add(startTime);
         abc.add(endTime);
         criteria.setCreateTime(abc);
-        criteria.setChannelId(channel.getId());
+//        criteria.setChannelId(channel.getId());//登录渠道
+        criteria.setRegChannelId(channel.getId());//注册渠道
 
         List<ChannelLog> channelLogs = channelLogService.queryAllV2(criteria);//PV统计
         //Set<ChannelLog> channelLogSet = new TreeSet<>(channelLogs);//UV统计
@@ -176,7 +177,12 @@ public class ChannelChartServiceImpl implements ChannelChartService {
         Long forCRegister = multiply(todayRegister, channel.getRegisterBuckleRate());
         channelChart.setForCRegister(forCRegister);
         channelChart.setOldLoginNum(todayOldLogin);
-        List<ProductLog> promoteLogList = promoteLogList(criteria, channel);//产品点击日志
+
+        AppQueryCriteria criteria1 = new AppQueryCriteria();
+        criteria1.setCreateTime(abc);
+        criteria1.setChannelId(channel.getId());//注册渠道
+
+        List<ProductLog> promoteLogList = promoteLogList(criteria1, channel);//产品点击日志
         Set<ProductLog> promoteLogSet = new TreeSet<>(promoteLogList);
         long newProductUv = promoteLogList.stream().filter(p -> {
             if (ObjectUtil.isNotEmpty(p.getUserStatus())) {
@@ -229,7 +235,6 @@ public class ChannelChartServiceImpl implements ChannelChartService {
      * @return
      */
     private List<ProductLog> promoteLogList(AppQueryCriteria criteria, Channel channel) {
-
 
         List<ProductLog> productLogList = productLogRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder));
         return productLogList;
