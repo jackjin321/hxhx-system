@@ -7,12 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.annotation.rest.AnonymousGetMapping;
 import me.zhengjie.annotation.rest.AnonymousPostMapping;
 import me.zhengjie.domain.Channel;
+import me.zhengjie.domain.HxSysConfig;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.app.service.AppUserService;
 import me.zhengjie.result.ResultBuilder;
 import me.zhengjie.result.ResultModel;
 import me.zhengjie.service.BannerService;
 import me.zhengjie.service.ChannelService;
+import me.zhengjie.service.HxSysConfigService;
 import me.zhengjie.service.ProductService;
 import me.zhengjie.service.dto.AppQueryCriteria;
 import me.zhengjie.utils.IPUtils;
@@ -47,6 +49,7 @@ public class MiniController {
     private final BannerService bannerService;
 
     private final AppUserService appUserService;
+    private final HxSysConfigService sysConfigService;
 
     /**
      * 根据页面和位置查询广告位
@@ -106,8 +109,10 @@ public class MiniController {
                                           @RequestHeader(name = "channel-code", required = false) String channelCode,
                                           HttpServletRequest request) {
 
+
         Channel channel = channelService.getChannelInfo(channelCode, uuid);
-        if (ObjectUtil.isAllEmpty(channel) && channel.getAuthStatus().equals("on")) {
+        log.info("新版身份证二要素验证接口 {}", JSONObject.toJSONString(channel));
+        if (ObjectUtil.isNotEmpty(channel) && channel.getAuthStatus().equals("on")) {
             /**
              * 新版身份证二要素验证接口
              */
@@ -190,6 +195,19 @@ public class MiniController {
     @GetMapping(value = "/test")
     public ResponseEntity<Object> get(AppQueryCriteria criteria, Pageable pageable) {
         return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    //    @GetMapping(value = "/url")
+    @AnonymousGetMapping(value = "/url")
+    public ResponseEntity<Object> getUrl(AppQueryCriteria criteria, Pageable pageable) {
+
+        HxSysConfig apkUrl = sysConfigService.findByKey("apk.url");
+        HxSysConfig iosUrl = sysConfigService.findByKey("ios.url");
+        Map<String, Object> authInfo = new HashMap<String, Object>(2) {{
+            put("apkUrl", apkUrl.getValue());
+            put("iosUrl", iosUrl.getValue());
+        }};
+        return new ResponseEntity<>(authInfo, HttpStatus.OK);
     }
 
     //    @PostMapping(value = "/channel")

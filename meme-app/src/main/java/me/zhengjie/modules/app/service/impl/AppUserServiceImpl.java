@@ -20,7 +20,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AppUserServiceImpl implements AppUserService {
-    private static final String appCode = "8e9a2f3851e642bf904c3f72ba3a29f5";
+    private static final String appCode = "3d76aa18e38a4c419bcd02366435b840";
 
     private static final String idCheckHost = "https://eid.shumaidata.com";
     private static final String path = "/eid/check";

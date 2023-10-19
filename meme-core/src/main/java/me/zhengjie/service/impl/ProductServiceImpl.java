@@ -110,18 +110,18 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> queryList(AppQueryCriteria criteria, HttpServletRequest request) {
         String channelCode = request.getHeader("channel-code");//登录渠道编号
         String uuid = request.getHeader("uuid");
-        Long regChannelId = SecurityUtils.getRegChannelIdByApp();
-        String regChannelName = SecurityUtils.getRegChannelNameByApp();
-        Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
-        Channel channel = null;
-        if (channelOptional.isPresent()) {
-            System.out.println("//注册渠道");
-            channel = channelOptional.get();//注册渠道
-        } else {
-            System.out.println("//登录渠道");
-            channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
-        }
-//        Channel channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
+        //Long regChannelId = SecurityUtils.getRegChannelIdByApp();
+        //String regChannelName = SecurityUtils.getRegChannelNameByApp();
+//        Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
+//        Channel channel = null;
+//        if (channelOptional.isPresent()) {
+//            System.out.println("//注册渠道");
+//            channel = channelOptional.get();//注册渠道
+//        } else {
+//            System.out.println("//登录渠道");
+//            channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
+//        }
+        Channel channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
         System.out.println(channel);
         criteria.setPortStatus(channel.getPortStatus());
         criteria.setStatus("onShelves");
