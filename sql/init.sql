@@ -91,6 +91,9 @@ add column `price_type` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_genera
 alter table `xf_channel`
 add column `register_buckle_rate` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '注册扣量比率' after process;
 
+alter table `xf_channel`
+add column `radar_status` varchar(255) DEFAULT 'off' COMMENT '雷达开关，on开启，off关闭' after auth_status;
+
 DROP TABLE IF EXISTS `xf_channel`;
 CREATE TABLE `xf_channel` (
   `channel_id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -100,6 +103,7 @@ CREATE TABLE `xf_channel` (
   `process` varchar(255) DEFAULT NULL COMMENT '流程控制',
   `register_buckle_rate` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '注册扣量比率',
   `auth_status` varchar(255) DEFAULT NULL COMMENT '二要素开关，on开启，off关闭',
+  `radar_status` varchar(255) DEFAULT NULL COMMENT '雷达开关，on开启，off关闭',
   `price_type` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '价格类型 uv, cpa',
   `price` decimal(10,4) unsigned NOT NULL DEFAULT '0.0000' COMMENT '单价',
   `sort` int DEFAULT NULL COMMENT '排序，数字倒序',

@@ -8,8 +8,12 @@ import me.zhengjie.annotation.rest.AnonymousGetMapping;
 import me.zhengjie.annotation.rest.AnonymousPostMapping;
 import me.zhengjie.domain.Channel;
 import me.zhengjie.domain.HxSysConfig;
+import me.zhengjie.domain.HxUser;
+import me.zhengjie.domain.HxUserReport;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.app.service.AppUserService;
+import me.zhengjie.modules.util.TestClient_V2;
+import me.zhengjie.repository.HxUserReportRepository;
 import me.zhengjie.result.ResultBuilder;
 import me.zhengjie.result.ResultModel;
 import me.zhengjie.service.BannerService;
@@ -21,6 +25,7 @@ import me.zhengjie.utils.IPUtils;
 import me.zhengjie.utils.SecurityUtils;
 import me.zhengjie.vo.MemberAuth;
 import me.zhengjie.vo.ParamBannerQuery;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +34,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +58,7 @@ public class MiniController {
 
     private final AppUserService appUserService;
     private final HxSysConfigService sysConfigService;
+    private final HxUserReportRepository hxUserReportRepository;
 
     /**
      * 根据页面和位置查询广告位
@@ -107,7 +116,7 @@ public class MiniController {
     public ResponseEntity<Object> saveMsg(@RequestBody @Valid MemberAuth memberAuth,
                                           @RequestHeader(name = "uuid", required = false) String uuid,
                                           @RequestHeader(name = "channel-code", required = false) String channelCode,
-                                          HttpServletRequest request) {
+                                          HttpServletRequest request) throws Exception {
 
 
         Channel channel = channelService.getChannelInfo(channelCode, uuid);
@@ -125,9 +134,73 @@ public class MiniController {
 
 
         Map<String, Object> authInfo = new HashMap<String, Object>(2) {{
-            put("token", 2);
+            put("process", channel.getProcess());
             put("user", 1);
         }};
+        if (ObjectUtil.isNotEmpty(channel) && "on".equals(channel.getRadarStatus())) {
+            log.info("全景雷达接口");
+            Long userId = SecurityUtils.getCurrentUserIdByApp();
+
+            HxUserReport userReport1 = hxUserReportRepository.findFirstByRealNameAndIdCard(memberAuth.getRealName(), memberAuth.getIdCard());
+            if (ObjectUtil.isNotEmpty(userReport1)) {
+                log.info("全景雷达报告已存在");
+                return ResponseEntity.ok(authInfo);
+            }
+            //二要素通过后，一步查询全景雷达报告，缓存到redis里，
+            String transId = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + RandomStringUtils.randomNumeric(16);
+            String res = TestClient_V2.checkResult(transId, memberAuth.getRealName(), memberAuth.getIdCard(), memberAuth.getPhone());
+            HxUserReport userReport = new HxUserReport();
+            userReport.setTransId(transId);
+            userReport.setUserId(userId);
+            userReport.setPhone(memberAuth.getPhone());
+            userReport.setRealName(memberAuth.getRealName());
+            userReport.setIdCard(memberAuth.getIdCard());
+            userReport.setProvince(memberAuth.getProvince());
+            userReport.setCity(memberAuth.getCity());
+            userReport.setIdCard(memberAuth.getIdCard());
+            userReport.setReport(res);
+            userReport.setOverdue("0");//逾期
+            userReport.setPerformance("0");//履约
+            userReport.setApplyReport("no");//申请雷达
+            userReport.setBehaviorReport("no");//行为雷达
+            /**
+             * 通过，就是展示B面，不通过，就展示A面
+             * 1、6个月内逾期笔数超过2笔，跳A面
+             * 2、只有申请雷达的全部拒，跳A面
+             * 3、 有行为雷达的 全部通过，跳B面
+             *
+             * B22170025  近 6 个月 M0+ 逾期贷款笔数
+             *
+             */
+            //处理report
+            if (ObjectUtil.isNotEmpty(res)) {
+                JSONObject object = JSONObject.parseObject(res);
+                String code = object.getString("code");
+                JSONObject resultDetail = object.getJSONObject("result_detail");
+                if (ObjectUtil.isNotEmpty(resultDetail)) {
+                    JSONObject currentReportDetail = resultDetail.getJSONObject("current_report_detail");//信用现状
+
+                    JSONObject behaviorReportDetail = resultDetail.getJSONObject("behavior_report_detail");
+
+                    JSONObject applyReportDetail = resultDetail.getJSONObject("apply_report_detail");
+                    if (ObjectUtil.isNotEmpty(currentReportDetail)) {
+
+                    }
+                    if (ObjectUtil.isNotEmpty(behaviorReportDetail)) {//行为雷达
+                        userReport.setBehaviorReport("yes");
+                        String B22170025 = behaviorReportDetail.getString("B22170025");
+                        if (ObjectUtil.isNotEmpty(B22170025)) {
+                            userReport.setOverdue(B22170025);
+                        }
+                    }
+                    if (ObjectUtil.isNotEmpty(applyReportDetail)) {
+                        userReport.setApplyReport("yes");
+                    }
+                }
+            }
+            hxUserReportRepository.save(userReport);
+        }
+
         return ResponseEntity.ok(authInfo);
     }
 

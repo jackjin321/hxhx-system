@@ -27,6 +27,33 @@ CREATE TABLE `hx_access_record` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='用户访问记录';
 
+alter table `hx_user_report`
+add column   `trans_id` varchar(64) DEFAULT NULL COMMENT 'trans_id' after user_id;
+
+DROP TABLE IF EXISTS `hx_user_report`;
+CREATE TABLE `hx_user_report` (
+  `user_id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+
+  `report` text DEFAULT NULL COMMENT '报告内容',
+  `trans_id` varchar(32) DEFAULT NULL COMMENT 'trans_id',
+  `apply_report` varchar(32) DEFAULT NULL COMMENT '申请雷达',
+  `behavior_report` varchar(32) DEFAULT NULL COMMENT '行为雷达',
+  `trans_id` varchar(32) DEFAULT NULL COMMENT 'trans_id',
+  `overdue` varchar(32) DEFAULT NULL COMMENT '逾期',
+  `performance` varchar(32) DEFAULT NULL COMMENT '履约',
+  `real_name` varchar(64) DEFAULT NULL COMMENT '用户名',
+  `id_card` varchar(32) DEFAULT NULL COMMENT '身份证号',
+  `phone` varchar(32) DEFAULT NULL COMMENT '手机号码',
+  `city` varchar(32) DEFAULT NULL COMMENT '城市',
+  `province` varchar(32) DEFAULT NULL COMMENT '省市',
+
+  `create_by` varchar(255) DEFAULT NULL COMMENT '创建者',
+  `update_by` varchar(255) DEFAULT NULL COMMENT '更新者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建日期',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`user_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT COMMENT='用户雷达报告';
+
 
 DROP TABLE IF EXISTS `hx_user`;
 CREATE TABLE `hx_user` (

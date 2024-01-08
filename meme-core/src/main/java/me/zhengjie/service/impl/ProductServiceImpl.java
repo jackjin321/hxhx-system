@@ -17,12 +17,15 @@ package me.zhengjie.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.access.RedisCacheKey;
 import me.zhengjie.config.FileProperties;
 import me.zhengjie.domain.Channel;
+import me.zhengjie.domain.HxUserReport;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.domain.Product;
 import me.zhengjie.repository.ChannelRepository;
+import me.zhengjie.repository.HxUserReportRepository;
 import me.zhengjie.repository.ProductRepository;
 import me.zhengjie.service.ChannelService;
 import me.zhengjie.service.IAccessService;
@@ -51,6 +54,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements ProductService {
 
     private final ChannelRepository channelRepository;
@@ -58,6 +62,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final FileProperties properties;
     private final ChannelService channelService;
+    private final HxUserReportRepository hxUserReportRepository;
 
     @Resource
     private RedisUtils redisUtils;
@@ -122,10 +127,49 @@ public class ProductServiceImpl implements ProductService {
 //            channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
 //        }
         Channel channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
-        System.out.println(channel);
-        criteria.setPortStatus(channel.getPortStatus());
+        //System.out.println(channel);
+//        criteria.setPortStatus(channel.getPortStatus());
+        //如果有雷达报告的，查一下雷达报告
+        Long userId = SecurityUtils.getCurrentUserIdByApp();
+        log.info("productList userId {}", userId);
+        Optional<HxUserReport> reportOptional = hxUserReportRepository.findById(userId);
+        String portStatus = channel.getPortStatus();
+        if (reportOptional.isPresent()) {
+            log.info("如果有雷达报告的，查一下雷达报告");
+            HxUserReport hxUserReport = reportOptional.get();
+            /**
+             * 雷达报告通过，就是展示B面，不通过，就展示A面
+             * 1、6个月内逾期笔数超过2笔，跳A面
+             * 2、只有申请雷达的全部拒，跳A面
+             * 3、 有行为雷达的 全部通过，跳B面
+             *
+             * B22170025  近 6 个月 M0+ 逾期贷款笔数
+             *
+             */
+            if ("yes".equals(hxUserReport.getApplyReport()) && "no".equals(hxUserReport.getBehaviorReport())) {
+                log.info("只有申请雷达的全部拒，跳A面");
+                portStatus = "A";
+            } else {
+                if ("yes".equals(hxUserReport.getBehaviorReport())) {
+                    if (ObjectUtil.isNotEmpty(hxUserReport.getOverdue())) {
+                        //6个月内逾期笔数超过2笔，跳A面
+                        log.info("6个月内逾期笔数超过2笔，跳A面 {}", hxUserReport.getOverdue());
+                        Integer abc = Integer.valueOf(hxUserReport.getOverdue());
+                        if (abc > 2) {
+                            portStatus = "A";
+                        } else {
+                            portStatus = "B";
+                        }
+                    }else{
+                        portStatus = "B";
+                    }
+                }
+            }
+        }
+        log.info("portStatus {}, channel.getPortStatus() {}", portStatus, channel.getPortStatus());
+        criteria.setPortStatus(portStatus);
         criteria.setStatus("onShelves");
-        List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
+        List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(portStatus, "onShelves");
         return productMapper.toDto(productList).stream().map(p -> {
             p.setApplyNum(this.getApplyNum(p.getId().toString()));
             return p;

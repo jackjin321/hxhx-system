@@ -23,6 +23,8 @@ public class MemberAuth implements Serializable {
      */
     private String idCard;
 
+    private String phone;
+
     private String province;
 
     private String city;

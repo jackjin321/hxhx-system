@@ -49,6 +49,7 @@ public class Channel extends BaseEntity implements Serializable {
     private String priceType;//价格类型，uv，cpa
     private String process;//流程控制，A面，助贷流程，B面，贷超流程
     private String authStatus;//二要素开关，on开启，off关闭
+    private String radarStatus;//雷达开关，on开启，off关闭
     private String portStatus;//AB面，A，B
     private Integer sort;
     private Boolean recycle;

@@ -21,19 +21,15 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.annotation.Log;
-import me.zhengjie.modules.mnt.websocket.MsgType;
-import me.zhengjie.modules.mnt.websocket.SocketMsg;
+
+import me.zhengjie.service.HxUserReportService;
 import me.zhengjie.service.HxUserService;
-import me.zhengjie.service.dto.HxUserDtoV2;
 import me.zhengjie.service.dto.HxUserQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * @author me zhengjie
@@ -48,6 +44,7 @@ import java.io.IOException;
 public class HxUserController {
 
     private final HxUserService hxUserService;
+    private final HxUserReportService hxUserReportService;
 
 
     @GetMapping(value = "/list")
@@ -56,6 +53,14 @@ public class HxUserController {
 //    @PreAuthorize("@el.check('hxUser:list')")
     public ResponseEntity<Object> queryHxUser(HxUserQueryCriteria criteria, Pageable pageable) {
         return new ResponseEntity<>(hxUserService.queryAll(criteria, pageable), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/report/list")
+    @Log("查询用户管理")
+    @ApiOperation("查询用户管理")
+//    @PreAuthorize("@el.check('hxUser:list')")
+    public ResponseEntity<Object> queryHxUserReport(HxUserQueryCriteria criteria, Pageable pageable) {
+        return new ResponseEntity<>(hxUserReportService.queryAll(criteria, pageable), HttpStatus.OK);
     }
 
 
