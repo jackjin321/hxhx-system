@@ -102,7 +102,7 @@ public class MiniController {
                                     @RequestHeader(name = "uuid", required = false) String uuid,
                                     @RequestHeader(name = "channel-code", required = false) String channelCode,
                                     HttpServletRequest request) {
-        System.out.println(paramBannerQuery);
+        //System.out.println(paramBannerQuery);
         paramBannerQuery.setUuid(uuid);
         paramBannerQuery.setChannelCode(channelCode);
         String realIP = IPUtils.getIpAddr(request);
