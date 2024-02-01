@@ -31,6 +31,8 @@ public class HxAuthUserDto {
     @NotBlank
     private String username;
 
+    private String platform;
+
 //    @NotBlank
     private String password;
 

@@ -54,12 +54,15 @@ CREATE TABLE `hx_user_report` (
   PRIMARY KEY (`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT COMMENT='用户雷达报告';
 
+alter table `hx_user`
+add column `platform` varchar(32) DEFAULT NULL COMMENT '平台类型，ios，android' after `user_id`;
 
 DROP TABLE IF EXISTS `hx_user`;
 CREATE TABLE `hx_user` (
   `user_id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
    `channel_id` bigint DEFAULT NULL COMMENT '渠道ID',
    `channel_name` varchar(255) DEFAULT NULL COMMENT '渠道名称',
+   `platform` varchar(32) DEFAULT NULL COMMENT '平台类型，ios，android',
   `username` varchar(255) DEFAULT NULL COMMENT '用户名',
   `nick_name` varchar(255) DEFAULT NULL COMMENT '昵称',
   `phone` varchar(255) DEFAULT NULL COMMENT '手机号码',
@@ -192,7 +195,7 @@ CREATE TABLE `xf_channel_log` (
   `reg_channel_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '渠道名称',
   `channel_id` bigint NOT NULL COMMENT '渠道Id',
   `channel_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '渠道名称',
-  `platform` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '平台类型，app，h5',
+  `platform` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '平台类型，ios，android',
   `device_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '设备id',
   `device_brand` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '设备id',
   `last_channel_id` bigint DEFAULT NULL COMMENT '登录渠道代码',

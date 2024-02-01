@@ -47,6 +47,7 @@ public class HxUser extends BaseEntity implements Serializable {
 
     private String channelName;
 
+    private String platform;
 
     @Column(name = "`username`", unique = true)
     @ApiModelProperty(value = "用户名")

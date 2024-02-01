@@ -140,7 +140,7 @@ public class HxUserServiceImpl implements HxUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String createUser(String phone, String password, String uuid, String channelCode, HttpServletRequest request) {
+    public String createUser(String phone, String password, String platform, String uuid, String channelCode, HttpServletRequest request) {
         if (ObjectUtil.isAllEmpty(channelCode)) {
             channelCode = "88888888";
         }
@@ -171,6 +171,7 @@ public class HxUserServiceImpl implements HxUserService {
             HxUser hxUser = new HxUser();
             hxUser.setChannelId(channelObject.getChannelId());//注册渠道
             hxUser.setChannelName(channelObject.getChannelName());//注册渠道
+            hxUser.setPlatform(platform);
             hxUser.setUsername(phone);
             hxUser.setPhone(phone);
             hxUser.setPassword(passwordEncoder.encode(password));

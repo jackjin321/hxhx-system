@@ -38,6 +38,8 @@ public class HxUserDto extends BaseDTO implements Serializable {
     private String channelName;
     private String username;
 
+    private String platform;
+
     private String nickName;
 
 

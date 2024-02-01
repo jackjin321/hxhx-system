@@ -146,7 +146,7 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     @Transactional
-    public ResponseEntity<Object> getChannelTokenByPlatformV1(String uuid, String platform, String deviceId, String channelCode,
+    public ResponseEntity<Object> getChannelTokenByPlatformV1(String uuid, String browser,String platform, String deviceId, String channelCode,
                                                               String realIp, String osId, String osName, HttpServletRequest request) {
         Optional<Channel> optionalChannel = findByUrlCodeOfVo(channelCode);
         if (!optionalChannel.isPresent()) {

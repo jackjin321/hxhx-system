@@ -288,13 +288,14 @@ public class MiniController {
     public ResponseEntity<Object> channel(@RequestBody JSONObject entity,
                                           HttpServletRequest request) {
         String realIP = IPUtils.getIpAddr(request);
+        String browser = entity.getString("browser");
         String platform = entity.getString("platform");
         String deviceId = entity.getString("deviceId");
         String uuid = entity.getString("uuid");//流量
         String channelId = entity.getString("channelId");//流量
         String osId = entity.getString("osId");
         String osName = entity.getString("osName");
-        return channelService.getChannelTokenByPlatformV1(uuid, platform, deviceId, channelId, realIP, osId, osName, request);
+        return channelService.getChannelTokenByPlatformV1(uuid, browser, platform, deviceId, channelId, realIP, osId, osName, request);
     }
 
     @PostMapping(value = "/uploadLogo")

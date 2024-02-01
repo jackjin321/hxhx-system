@@ -82,7 +82,7 @@ public interface HxUserService {
      */
     HxUserLoginDto getLoginData(String phone);
 
-    String createUser(String phone, String password, String uuid, String channelCode, HttpServletRequest request);
+    String createUser(String phone, String password, String platform, String uuid, String channelCode, HttpServletRequest request);
 
     /**
      * 获取用户权限信息

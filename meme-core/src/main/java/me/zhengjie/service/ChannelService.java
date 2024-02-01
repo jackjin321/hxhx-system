@@ -17,7 +17,7 @@ public interface ChannelService {
    ResultModel<Map> getChannelTokenByPlatformV3(String channelToken,String platform, String deviceId,
                                                 String channelCode, String ip, String osId,
                                                 String osName, HttpServletRequest request);
-   ResponseEntity<Object> getChannelTokenByPlatformV1(String uuid, String platform, String deviceId,
+   ResponseEntity<Object> getChannelTokenByPlatformV1(String uuid, String browser,String platform, String deviceId,
                                                       String channelCode, String ip, String osId,
                                                       String osName, HttpServletRequest request);
    String createChannelToken(ChannelLog channelLog, Channel channelVO);

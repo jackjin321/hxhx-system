@@ -110,7 +110,7 @@ public class AuthorizationController {
         String channelCode = request.getHeader("channel-code");
         String uuid = request.getHeader("uuid");
         log.info("用户登录 {} {} {} {}", authUser.getUsername(), authUser.getPassword(), uuid, channelCode);
-        String userAction = hxUserService.createUser(authUser.getUsername(), authUser.getPassword(), uuid, channelCode, request);
+        String userAction = hxUserService.createUser(authUser.getUsername(), authUser.getPassword(), authUser.getPlatform(), uuid, channelCode, request);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
