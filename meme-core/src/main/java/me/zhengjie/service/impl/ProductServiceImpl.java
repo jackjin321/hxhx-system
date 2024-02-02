@@ -141,7 +141,7 @@ public class ProductServiceImpl implements ProductService {
              * 雷达报告通过，就是展示B面，不通过，就展示A面
              * 1、6个月内逾期笔数超过2笔，跳A面
              * 2、只有申请雷达的全部拒，跳A面
-             * 3、 有行为雷达的 全部通过，跳B面
+             * 3、有行为雷达的 全部通过，跳B面
              *
              * B22170025  近 6 个月 M0+ 逾期贷款笔数
              *

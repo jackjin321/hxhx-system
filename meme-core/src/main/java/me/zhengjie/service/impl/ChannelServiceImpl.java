@@ -48,8 +48,8 @@ public class ChannelServiceImpl implements ChannelService {
             //根据token信息获取渠道信息，最近登录渠道信息
             Optional<ChannelObject> optional = accessService.getChannelObject(uuid);
             if (optional.isPresent()) {
-                JSONObject simpleMap = new JSONObject();
-                simpleMap.put("token", uuid);
+                //JSONObject simpleMap = new JSONObject();
+                //simpleMap.put("token", uuid);
                 Channel channel = channelRepository.getById(optional.get().getChannelId());
                 return channel;
             } else {

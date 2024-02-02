@@ -127,7 +127,7 @@ public class MiniController {
              */
             log.info("新版身份证二要素验证接口");
             String idCardFlag = appUserService.checkIdentity(memberAuth);
-            if (ObjectUtil.isAllNotEmpty(idCardFlag)) {
+            if (ObjectUtil.isNotEmpty(idCardFlag)) {
                 throw new BadRequestException(idCardFlag);
             }
         }
@@ -141,18 +141,20 @@ public class MiniController {
             log.info("全景雷达接口");
             Long userId = SecurityUtils.getCurrentUserIdByApp();
 
-            HxUserReport userReport1 = hxUserReportRepository.findFirstByRealNameAndIdCard(memberAuth.getRealName(), memberAuth.getIdCard());
+            HxUserReport userReport1 = hxUserReportRepository.findFirstByRealNameAndIdCard(memberAuth.getRealName(),
+                    memberAuth.getIdCard());
             if (ObjectUtil.isNotEmpty(userReport1)) {
                 log.info("全景雷达报告已存在");
                 return ResponseEntity.ok(authInfo);
             }
             //二要素通过后，一步查询全景雷达报告，缓存到redis里，
             String transId = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + RandomStringUtils.randomNumeric(16);
-            String res = TestClient_V2.checkResult(transId, memberAuth.getRealName(), memberAuth.getIdCard(), memberAuth.getPhone());
+            String res = TestClient_V2.checkResult(transId, memberAuth.getRealName(), memberAuth.getIdCard(), SecurityUtils.getCurrentUserPhoneByApp());
             HxUserReport userReport = new HxUserReport();
             userReport.setTransId(transId);
             userReport.setUserId(userId);
-            userReport.setPhone(memberAuth.getPhone());
+//            userReport.setPhone(memberAuth.getPhone());
+            userReport.setPhone(SecurityUtils.getCurrentUserPhoneByApp());
             userReport.setRealName(memberAuth.getRealName());
             userReport.setIdCard(memberAuth.getIdCard());
             userReport.setProvince(memberAuth.getProvince());
