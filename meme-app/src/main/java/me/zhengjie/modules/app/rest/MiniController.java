@@ -137,14 +137,17 @@ public class MiniController {
             put("process", channel.getProcess());
             put("user", 1);
         }};
+        authInfo.put("port", "B");
         if (ObjectUtil.isNotEmpty(channel) && "on".equals(channel.getRadarStatus())) {
             log.info("全景雷达接口");
             Long userId = SecurityUtils.getCurrentUserIdByApp();
 
-            HxUserReport userReport1 = hxUserReportRepository.findFirstByRealNameAndIdCard(memberAuth.getRealName(),
-                    memberAuth.getIdCard());
+            HxUserReport userReport1 = hxUserReportRepository.findFirstByRealNameAndIdCard(memberAuth.getRealName(), memberAuth.getIdCard());
             if (ObjectUtil.isNotEmpty(userReport1)) {
                 log.info("全景雷达报告已存在");
+                //判断一下userReport
+                String portStatus = productService.getPortStatus(userReport1);
+                authInfo.put("port", portStatus);
                 return ResponseEntity.ok(authInfo);
             }
             //二要素通过后，一步查询全景雷达报告，缓存到redis里，
@@ -200,6 +203,9 @@ public class MiniController {
                     }
                 }
             }
+            //判断一下userReport
+            String portStatus = productService.getPortStatus(userReport);
+            authInfo.put("port", portStatus);
             hxUserReportRepository.save(userReport);
         }
 

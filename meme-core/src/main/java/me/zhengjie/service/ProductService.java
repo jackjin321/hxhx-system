@@ -15,6 +15,7 @@
  */
 package me.zhengjie.service;
 
+import me.zhengjie.domain.HxUserReport;
 import me.zhengjie.domain.Product;
 import me.zhengjie.result.ResultModel;
 import me.zhengjie.service.dto.ProductDto;
@@ -34,6 +35,8 @@ import java.util.Set;
  * @date 2019-08-24
  */
 public interface ProductService {
+
+    String getPortStatus(HxUserReport userReport);
 
     Integer getApplyNum(String productId);
 

@@ -137,34 +137,7 @@ public class ProductServiceImpl implements ProductService {
         if (reportOptional.isPresent()) {
             log.info("如果有雷达报告的，查一下雷达报告");
             HxUserReport hxUserReport = reportOptional.get();
-            /**
-             * 雷达报告通过，就是展示B面，不通过，就展示A面
-             * 1、6个月内逾期笔数超过2笔，跳A面
-             * 2、只有申请雷达的全部拒，跳A面
-             * 3、有行为雷达的 全部通过，跳B面
-             *
-             * B22170025  近 6 个月 M0+ 逾期贷款笔数
-             *
-             */
-            if ("yes".equals(hxUserReport.getApplyReport()) && "no".equals(hxUserReport.getBehaviorReport())) {
-                log.info("只有申请雷达的全部拒，跳A面");
-                portStatus = "A";
-            } else {
-                if ("yes".equals(hxUserReport.getBehaviorReport())) {
-                    if (ObjectUtil.isNotEmpty(hxUserReport.getOverdue())) {
-                        //6个月内逾期笔数超过2笔，跳A面
-                        log.info("6个月内逾期笔数超过2笔，跳A面 {}", hxUserReport.getOverdue());
-                        Integer abc = Integer.valueOf(hxUserReport.getOverdue());
-                        if (abc > 2) {
-                            portStatus = "A";
-                        } else {
-                            portStatus = "B";
-                        }
-                    }else{
-                        portStatus = "B";
-                    }
-                }
-            }
+            portStatus = this.getPortStatus(hxUserReport);
         }
         log.info("portStatus {}, channel.getPortStatus() {}", portStatus, channel.getPortStatus());
         criteria.setPortStatus(portStatus);
@@ -176,6 +149,39 @@ public class ProductServiceImpl implements ProductService {
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public String getPortStatus(HxUserReport hxUserReport){
+        /**
+         * 雷达报告通过，就是展示B面，不通过，就展示A面
+         * 1、6个月内逾期笔数超过2笔，跳A面
+         * 2、只有申请雷达的全部拒，跳A面
+         * 3、有行为雷达的 全部通过，跳B面
+         *
+         * B22170025  近 6 个月 M0+ 逾期贷款笔数
+         *
+         */
+        String portStatus = "B";
+        if ("yes".equals(hxUserReport.getApplyReport()) && "no".equals(hxUserReport.getBehaviorReport())) {
+            log.info("只有申请雷达的全部拒，跳A面");
+            portStatus = "A";
+        } else {
+            if ("yes".equals(hxUserReport.getBehaviorReport())) {
+                if (ObjectUtil.isNotEmpty(hxUserReport.getOverdue())) {
+                    //6个月内逾期笔数超过2笔，跳A面
+                    log.info("6个月内逾期笔数超过2笔，跳A面 {}", hxUserReport.getOverdue());
+                    Integer abc = Integer.valueOf(hxUserReport.getOverdue());
+                    if (abc > 2) {
+                        portStatus = "A";
+                    } else {
+                        portStatus = "B";
+                    }
+                }else{
+                    portStatus = "B";
+                }
+            }
+        }
+        return portStatus;
+    }
 
     @Override
     public ProductDto findById(Long id) {
