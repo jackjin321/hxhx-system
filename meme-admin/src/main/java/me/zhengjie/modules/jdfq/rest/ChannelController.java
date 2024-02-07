@@ -70,17 +70,17 @@ public class ChannelController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-//    @Log("删除渠道")
-//    @ApiOperation(value = "删除渠道")
-//    @DeleteMapping
-////    @PreAuthorize("@el.check('product:del')")
-//    public ResponseEntity<Object> deleteApp(@RequestBody Set<Long> ids) {
-//        if(ids.contains(1L) || ids.contains(13L) || ids.contains(8L)){
-//            throw new BadRequestException("禁止删除APP渠道信息");
-//        }
-//        channelService.delete(ids);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
+    @Log("删除渠道")
+    @ApiOperation(value = "删除渠道")
+    @DeleteMapping
+//    @PreAuthorize("@el.check('product:del')")
+    public ResponseEntity<Object> deleteApp(@RequestBody Set<Long> ids) {
+        if(ids.contains(1L) || ids.contains(13L) || ids.contains(8L)){
+            throw new BadRequestException("禁止删除APP渠道信息");
+        }
+        channelService.delete(ids);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 
     /**
