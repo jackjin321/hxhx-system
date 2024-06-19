@@ -141,8 +141,8 @@ public class HxUserServiceImpl implements HxUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String createUser(String phone, String password, String platform, String uuid, String channelCode, HttpServletRequest request) {
-        if (ObjectUtil.isAllEmpty(channelCode)) {
-            channelCode = "88888888";
+        if (ObjectUtil.isEmpty(channelCode)) {
+            channelCode = "359b686e59d0c5df";
         }
 //        HxChannel channel = hxChannelRepository.findByChannelCode(channelCode);
 //        if (ObjectUtil.isAllEmpty(channel)) {

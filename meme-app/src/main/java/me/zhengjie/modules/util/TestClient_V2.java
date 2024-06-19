@@ -17,9 +17,9 @@ import java.util.Date;
 
 public class TestClient_V2 {
 
-    public final static String memberId = "0x0005285";
-    public final static String appid = "A44XEKWSK4GHYJ4J41NCBS186WCTQSWJ";
-    public final static String scerect = "sWE7b6mAtHBBQnnRc8ABCha44QnQiw5t";
+    public final static String memberId = "";
+    public final static String appid = "";
+    public final static String scerect = "";
 
     public static void main(String[] args) throws Exception {
         JSONObject json = new JSONObject();

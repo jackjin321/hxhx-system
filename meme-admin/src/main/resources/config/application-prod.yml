@@ -1,5 +1,5 @@
 server:
-  port: 7070
+  port: 7870
   tomcat:
     #等待队列长度
     accept-count: 1000
@@ -15,7 +15,7 @@ spring:
     database: ${REDIS_DB:14}
     host: ${REDIS_HOST:127.0.0.1}
     port: ${REDIS_PORT:6379}
-    password: ${REDIS_PWD:xiao789fei}
+    password: ${REDIS_PWD:fooj232bared}
     #连接超时时间
     timeout: 5000
   datasource:

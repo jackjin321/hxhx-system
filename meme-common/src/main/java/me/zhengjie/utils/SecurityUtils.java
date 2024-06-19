@@ -79,18 +79,18 @@ public class SecurityUtils {
     }
     public static Long getCurrentUserIdByApp() {
         UserDetails userDetails = getCurrentUser();
-        System.out.println(new JSONObject(userDetails));
+        //System.out.println(new JSONObject(userDetails));
         //{"authorities":[{"authority":"appFind"}],"user":{"lastOpTime":1694917867000,"registerTime":1694917867000,"updateTime":1694917867000,"userId":6,"enabled":true,"lastLoginTime":1694917867000,"password":"$2a$10$jmw5mnbA/9lfvxKFlGcwNOD1Yf9ax0HshbcoHOGlhmxkZgBdN9hAG","createBy":"System","phone":"13800010001","updateBy":"System","createTime":1694917867000,"channelName":"表单h5测试","channelId":1,"username":"13800010001"}}
         return new JSONObject(new JSONObject(userDetails).get("user")).get("userId", Long.class);
     }
     public static Long getRegChannelIdByApp() {
         UserDetails userDetails = getCurrentUser();
-        System.out.println(new JSONObject(userDetails));
+        //System.out.println(new JSONObject(userDetails));
         return new JSONObject(new JSONObject(userDetails).get("user")).get("channelId", Long.class);
     }
     public static String getRegChannelNameByApp() {
         UserDetails userDetails = getCurrentUser();
-        System.out.println(new JSONObject(userDetails));
+        //System.out.println(new JSONObject(userDetails));
         return new JSONObject(new JSONObject(userDetails).get("user")).get("channelName", String.class);
     }
     public static Long getCurrentUserIdByAdmin() {

@@ -233,10 +233,10 @@ public class BannerServiceImpl implements BannerService {
         Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
         Channel channel = null;
         if (channelOptional.isPresent()) {
-            System.out.println("//注册渠道");
+            //System.out.println("//注册渠道");
             channel = channelOptional.get();//注册渠道
         } else {
-            System.out.println("//登录渠道");
+            ///System.out.println("//登录渠道");
             channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());;//登录渠道
         }
 
@@ -313,8 +313,8 @@ public class BannerServiceImpl implements BannerService {
         LocalDate localDate2 = date2.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
-        System.out.println(localDate1);
-        System.out.println(localDate2);
+//        System.out.println(localDate1);
+//        System.out.println(localDate2);
         return localDate1.isEqual(localDate2);
     }
 

@@ -8,7 +8,6 @@ INSERT INTO `xiaofei`.`xf_banner` (`id`, `banner_name`, `title`, `sub_title`, `p
 
 
 
-
 INSERT INTO `xiaofei`.`xf_banner` (`id`, `banner_name`, `title`, `sub_title`, `page`, `pos`, `jump_type`, `jump_url`, `image_url`, `status`, `sort_num`, `product_id`, `channel_id`, `create_by`, `update_by`, `create_time`, `update_time`) VALUES (19, NULL, '2229', '2226', 'home', 'banner', 'product', NULL, 'banner01-20221205014505742.jpg', 'on', 22, 1, 6, 'xiaoAdminFei', 'yuying01', '2022-12-04 20:57:14', '2022-12-07 01:08:33');
 INSERT INTO `xiaofei`.`xf_banner` (`id`, `banner_name`, `title`, `sub_title`, `page`, `pos`, `jump_type`, `jump_url`, `image_url`, `status`, `sort_num`, `product_id`, `channel_id`, `create_by`, `update_by`, `create_time`, `update_time`) VALUES (20, NULL, '测试01', '测试02', 'home', 'banner', 'product', NULL, 'banner02-2022120501453567.jpg', 'on', 11, 1, 6, 'xiaoAdminFei', 'yuying01', '2022-12-05 01:45:42', '2022-12-07 01:08:25');
 INSERT INTO `xiaofei`.`xf_banner` (`id`, `banner_name`, `title`, `sub_title`, `page`, `pos`, `jump_type`, `jump_url`, `image_url`, `status`, `sort_num`, `product_id`, `channel_id`, `create_by`, `update_by`, `create_time`, `update_time`) VALUES (21, NULL, '信用借款', '解腻', 'home', 'tag', 'product', NULL, 'tag1-20221205020545573.png', 'on', 22, 1, 6, 'xiaoAdminFei', 'yuying01', '2022-12-05 02:05:52', '2022-12-07 01:08:17');

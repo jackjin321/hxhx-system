@@ -254,7 +254,7 @@ public class ChannelServiceImpl implements ChannelService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(Channel resources) {
-        System.out.println(resources.toString());
+//        System.out.println(resources.toString());
         channelRepository.save(resources);
         String id = Long.toString(resources.getId());
         Optional<String> optionalS = DESUtil.encrypt(id, DES_KEY);

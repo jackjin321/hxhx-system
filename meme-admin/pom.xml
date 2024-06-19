@@ -95,6 +95,8 @@
 
     <!-- 打包 -->
     <build>
+        <!-- 设置构建的 jar 包名 -->
+<!--        <finalName>${project.artifactId}</finalName>-->
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
