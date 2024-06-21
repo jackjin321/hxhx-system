@@ -1,6 +1,6 @@
 !#/bin/bash
 #相关配置信息
-SERVER="154.55.172.134"
+SERVER=".55.172."
 PASSWORD="abc123"
 COUNTRY="US"
 STATE="beijing"

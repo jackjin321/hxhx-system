@@ -1,5 +1,5 @@
 server:
-  port: 7090
+  port: 7890
   servlet:
     context-path: /xfapi
   tomcat:

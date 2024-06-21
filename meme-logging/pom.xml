@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>meme-logging</artifactId>
-    <name>日志模块</name>
+    <name></name>
 
     <dependencies>
         <dependency>
