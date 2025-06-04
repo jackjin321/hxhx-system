@@ -2,28 +2,137 @@
 package me.zhengjie.modules.app.service.impl;
 
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.zhengjie.access.RedisCacheKey;
 import me.zhengjie.modules.app.service.AppUserService;
+import me.zhengjie.utils.RandomUtil;
+import me.zhengjie.utils.RedisUtils;
+import me.zhengjie.utils.SecurityUtils;
+import me.zhengjie.utils.StringUtils;
 import me.zhengjie.vo.MemberAuth;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppUserServiceImpl implements AppUserService {
     private static final String appCode = "3d76aa18e38a4c419bcd02366435b840";
-
     private static final String idCheckHost = "https://eid.shumaidata.com";
     private static final String path = "/eid/check";
+    private static final String gateway = "https://openapi.danmi.com/";
+    private static final String wayUrl = "/textSMS/sendSMS/batch/v1";
+    private static final String signName = "助帮";
+    private static final String accountId = "100140147453";
+    private static final String accountSid = "91a2f1057c6075cd1c1470331855de9e";
+    private static final String authToken = "25dcfec252e8a9d043ce49e87c067fba";
+
+
+    private final RedisUtils redisUtils;
+
+    @Override
+    public boolean checkSmsCode(String phone, String code) {
+        String loginCodeKey = RedisCacheKey.loginCodeKey(phone);
+        // 查询验证码
+        String cacheCode = (String) redisUtils.get(loginCodeKey);
+        // 清除验证码
+        //redisUtils.del(loginCodeKey);
+        if (StringUtils.isBlank(code)) {
+//            throw new BadRequestException("验证码不存在或已过期");
+            return false;
+        }
+        if (code.equals(cacheCode)) {
+//            redisValueTemplate.delete(loginCodeKey);
+            redisUtils.del(loginCodeKey);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean sendSmsCode(String phone) {
+        // 保存
+        double count = redisUtils.hincr("FLASH_CODE", phone, 1L);
+        log.info("count {}", count);
+        if (count > 10) {
+            return false;
+        }
+
+        String code = RandomUtil.randomNumber(6);
+        log.info("code {}", code);
+        //发送短信，需要重新找一个渠道
+        boolean flag = sendFanQin(phone, code);
+        if (flag) {
+            redisUtils.del(RedisCacheKey.loginCodeKey(phone));
+            // 保存
+            redisUtils.set(RedisCacheKey.loginCodeKey(phone), code, 5, TimeUnit.MINUTES);
+        }
+        return flag;
+    }
+
+    /**
+     * $reqData=[
+     * "accountSid"=>self::$danmi["accountSid"],
+     * "accountId"=>self::$danmi["accountId"],
+     * "sig"=>md5(self::$danmi["accountSid"].self::$danmi["authToken"].$milliseconds),
+     * "timestamp"=>$milliseconds,
+     * "dataList"=>[
+     * [
+     * "to"=>$number,
+     * "templateid"=>234234,
+     * "smsContent"=>"【".self::$danmi["signName"]."】您的验证码是：".$code."，两分钟内有效，请勿透露给他人"
+     * ]
+     * ]
+     * ];
+     *
+     * @param phone
+     * @param code
+     * @return
+     */
+    @Override
+    public boolean sendFanQin(String phone, String code) {
+        //return sendSms(phone, code, SmsEnum.FanQin);
+        long currentTimeMillis = DateUtil.current();
+        String sig = DigestUtil.md5Hex(String.format("%s%s%d", accountSid, authToken, currentTimeMillis));
+        cn.hutool.json.JSONObject param = JSONUtil.createObj();
+        param.put("accountSid", accountSid);
+        param.put("accountId", accountId);
+        param.put("sig", sig);
+        param.put("timestamp", currentTimeMillis);
+        cn.hutool.json.JSONArray dataList = JSONUtil.createArray();
+        cn.hutool.json.JSONObject data = JSONUtil.createObj();
+        data.put("to", phone);
+        data.put("templateid", 234234);
+        data.put("smsContent", String.format("【%s】您的验证码是：%s，两分钟内有效，请勿透露给他人", signName, code));
+        dataList.put(data);
+        param.put("dataList", dataList);
+        String url = gateway + wayUrl;
+        HttpResponse response = HttpRequest.post(url)
+                .body(JSONUtil.toJsonStr(param), "application/json")
+                .execute();
+        int status = response.getStatus();
+        String body = response.body();
+        cn.hutool.json.JSONObject result = JSONUtil.parseObj(body);
+//        System.out.println(result);
+        log.info("{} request {}; response {}", phone, JSONUtil.toJsonStr(param), body);
+        if ("0000".equals(result.getStr("respCode"))) {
+            return true;
+        }
+        //{"success":true,"respCode":"0000","respDesc":"请求成功。","smsId":"ia1868011096980733952","failList":[]}
+        return false;
+    }
 
     @Override
     public String checkIdentity(MemberAuth memberAuth) {

@@ -14,15 +14,20 @@ public class RedisCacheKey {
         return String.format("productApplyNum::%s", productId);
     }
 
+    public static String productUnionLinkKey(String userId, String productId) {
+        return String.format("productUnionLink::%s::%s", userId, productId);
+    }
+
     /**
      * http请求
      */
     public static final String channelTokenKey = "channel-token";
     public static final String appSource = "app-name";
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         System.out.println(isTestMobile(""));
     }
+
     /**
      * 渠道访问信息
      *

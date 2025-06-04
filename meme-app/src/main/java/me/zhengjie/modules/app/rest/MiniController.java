@@ -222,7 +222,7 @@ public class MiniController {
     @GetMapping(value = "/product/list")
     public ResponseEntity<Object> productList(AppQueryCriteria criteria, Pageable pageable, HttpServletRequest request) {
         //Long userId = SecurityUtils.getCurrentUserIdByApp();
-        return new ResponseEntity<>(productService.queryList(criteria, request), HttpStatus.OK);
+        return new ResponseEntity<>(productService.queryListV2(criteria, request), HttpStatus.OK);
     }
 
     /**
@@ -233,10 +233,10 @@ public class MiniController {
      * @param pageable
      * @return
      */
-    @GetMapping(value = "/find/top/list")
-    public ResponseEntity<Object> findTopList(AppQueryCriteria criteria, Pageable pageable) {
-        return new ResponseEntity<>(productService.queryAll(criteria, pageable), HttpStatus.OK);
-    }
+//    @GetMapping(value = "/find/top/list")
+//    public ResponseEntity<Object> findTopList(AppQueryCriteria criteria, Pageable pageable) {
+//        return new ResponseEntity<>(productService.queryAll(criteria, pageable), HttpStatus.OK);
+//    }
 
     /**
      * 废弃
@@ -246,12 +246,12 @@ public class MiniController {
      * @param pageable
      * @return
      */
-    @GetMapping(value = "/find/top")
-    public ResponseEntity<Object> findTop(AppQueryCriteria criteria, Pageable pageable,
-                                          @RequestHeader(name = "uuid", required = false) String uuid,
-                                          @RequestHeader(name = "channel-code", required = false) String channelCode) {
-        return new ResponseEntity<>(productService.queryAll(criteria, pageable), HttpStatus.OK);
-    }
+//    @GetMapping(value = "/find/top")
+//    public ResponseEntity<Object> findTop(AppQueryCriteria criteria, Pageable pageable,
+//                                          @RequestHeader(name = "uuid", required = false) String uuid,
+//                                          @RequestHeader(name = "channel-code", required = false) String channelCode) {
+//        return new ResponseEntity<>(productService.queryAll(criteria, pageable), HttpStatus.OK);
+//    }
 
     /**
      * 随机跳转一个产品

@@ -160,14 +160,14 @@ public class HxUserServiceImpl implements HxUserService {
         } else {
             //异常
         }
-        if (ObjectUtil.isAllEmpty(channelObject)) {
+        if (ObjectUtil.isEmpty(channelObject)) {
             throw new BadRequestException("请求异常");
         }
         //ChannelLog channelLog = new ChannelLog();
         //channelLog.setId(channelObject.getChannelLogId());
         HxUser user = hxUserRepository.findByPhone(phone);
         if (user == null) {
-            //注册
+            //新用户注册
             HxUser hxUser = new HxUser();
             hxUser.setChannelId(channelObject.getChannelId());//注册渠道
             hxUser.setChannelName(channelObject.getChannelName());//注册渠道
@@ -191,7 +191,7 @@ public class HxUserServiceImpl implements HxUserService {
             //throw new EntityNotFoundException(HxUser.class, "phone", phone);
 //            return AccessEventEnum.REGISTER.getCode();
         } else {
-            //老用户
+            //老用户登陆
 //            channelLog.setUserId(user.getUserId());
 //            channelLog.setIsRegister(false);
 //            channelLog.setIsLogin(true);

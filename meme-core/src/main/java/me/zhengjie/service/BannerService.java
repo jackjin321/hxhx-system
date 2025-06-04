@@ -27,6 +27,7 @@ public interface BannerService {
 
     ResultModel toProductUrlV2(ParamBannerQuery paramBanner);
     ResultModel findOne(ParamBannerQuery paramBanner);
+    String findOneByLogin(ParamBannerQuery paramBanner);
     Object queryAll(AppQueryCriteria criteria, Pageable pageable);
 
     /**

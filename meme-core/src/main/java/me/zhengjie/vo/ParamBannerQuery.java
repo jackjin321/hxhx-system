@@ -23,6 +23,7 @@ public class ParamBannerQuery implements Serializable {
     @NotBlank(message = "页面不能为空")
     private String page;
 
+    private Long userId;
     /**
      * 位置
      */
@@ -41,4 +42,5 @@ public class ParamBannerQuery implements Serializable {
     private String uuid;
     private String channelCode;
     private String realIP;
+    private String phone;
 }

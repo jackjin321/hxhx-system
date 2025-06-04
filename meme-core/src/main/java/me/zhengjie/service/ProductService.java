@@ -36,6 +36,8 @@ import java.util.Set;
  */
 public interface ProductService {
 
+    Boolean checkProduct(Product product);
+    String hitLogin(Product product);
     String getPortStatus(HxUserReport userReport);
 
     Integer getApplyNum(String productId);
@@ -58,6 +60,7 @@ public interface ProductService {
      * @return /
      */
     List<ProductDto> queryList(AppQueryCriteria criteria, HttpServletRequest request);
+    List<ProductDto> queryListV2(AppQueryCriteria criteria, HttpServletRequest request);
 
     /**
      * 根据ID查询

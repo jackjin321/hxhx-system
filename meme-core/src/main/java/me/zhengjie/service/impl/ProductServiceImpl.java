@@ -16,6 +16,12 @@
 package me.zhengjie.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.access.RedisCacheKey;
@@ -112,6 +118,36 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductDto> queryListV2(AppQueryCriteria criteria, HttpServletRequest request) {
+        String channelCode = request.getHeader("channel-code");//登录渠道编号
+        String uuid = request.getHeader("uuid");
+
+        Channel channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
+//        criteria.setPortStatus(channel.getPortStatus());
+        //如果有雷达报告的，查一下雷达报告
+        //Long userId = SecurityUtils.getCurrentUserIdByApp();
+        //log.info("productList userId {}", userId);
+        // Optional<HxUserReport> reportOptional = hxUserReportRepository.findById(userId);
+        String portStatus = channel.getPortStatus();
+//        if (reportOptional.isPresent()) {
+//            log.info("如果有雷达报告的，查一下雷达报告");
+//            HxUserReport hxUserReport = reportOptional.get();
+//            portStatus = this.getPortStatus(hxUserReport);
+//        }
+        log.info("portStatus {}, channel.getPortStatus() {}", portStatus, channel.getPortStatus());
+        criteria.setPortStatus(portStatus);
+        criteria.setStatus("onShelves");
+        List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(portStatus, "onShelves");
+        List<Product> filterList = productList.stream().filter(p -> {
+            return checkProduct(p);
+        }).collect(Collectors.toList());
+        return productMapper.toDto(filterList).stream().map(p -> {
+            p.setApplyNum(this.getApplyNum(p.getId().toString()));
+            return p;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<ProductDto> queryList(AppQueryCriteria criteria, HttpServletRequest request) {
         String channelCode = request.getHeader("channel-code");//登录渠道编号
         String uuid = request.getHeader("uuid");
@@ -150,7 +186,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String getPortStatus(HxUserReport hxUserReport){
+    public String getPortStatus(HxUserReport hxUserReport) {
         /**
          * 雷达报告通过，就是展示B面，不通过，就展示A面
          * 1、6个月内逾期笔数超过2笔，跳A面
@@ -175,7 +211,7 @@ public class ProductServiceImpl implements ProductService {
                     } else {
                         portStatus = "B";
                     }
-                }else{
+                } else {
                     portStatus = "B";
                 }
             }
@@ -227,5 +263,85 @@ public class ProductServiceImpl implements ProductService {
         for (Long id : ids) {
             productRepository.deleteById(id);
         }
+    }
+
+    @Override
+    public Boolean checkProduct(Product product) {
+        if ("uv".equals(product.getProductType())) {
+            return true;
+        } else {
+            if ("zxh".equals(product.getProductCode())) {
+                return checkHit(product);
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private Boolean checkHit(Product product) {
+        Long userId = SecurityUtils.getCurrentUserIdByApp();
+        String hitUrl = getUnionUrlByProduct(userId.toString(), product.getId().toString());
+        if (ObjectUtil.isNotEmpty(hitUrl)) {
+            return true;
+        }
+        JSONObject param = JSONUtil.createObj();
+        param.put("md5Phone", DigestUtil.md5Hex(SecurityUtils.getCurrentUserPhoneByApp()));
+        String url = "https://app.hfzbxx.cn/web/index.php?r=open/loan/check";
+        HttpResponse response = HttpRequest.post(url)
+                .body(JSONUtil.toJsonStr(param), "application/json")
+                .execute();
+        int status = response.getStatus();
+        String body = response.body();
+        JSONObject result = JSONUtil.parseObj(body);
+//        System.out.println(result);
+        log.info("{} request {}; response {}", SecurityUtils.getCurrentUserPhoneByApp(), JSONUtil.toJsonStr(param), body);
+        if ("200".equals(result.getStr("code"))) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public String hitLogin(Product product) {
+        Long userId = SecurityUtils.getCurrentUserIdByApp();
+        String hitUrl = getUnionUrlByProduct(userId.toString(), product.getId().toString());
+        if (ObjectUtil.isNotEmpty(hitUrl)) {
+            return hitUrl;
+        }
+
+        JSONObject param = JSONUtil.createObj();
+        param.put("phone", SecurityUtils.getCurrentUserPhoneByApp());
+        param.put("scene", "7nIG3JVY");
+        param.put("regChannel", "dd");
+        String url = "https://app.hfzbxx.cn/web/index.php?r=open/loan/add";
+        HttpResponse response = HttpRequest.post(url)
+                .body(JSONUtil.toJsonStr(param), "application/json")
+                .execute();
+        int status = response.getStatus();
+        String body = response.body();
+        JSONObject result = JSONUtil.parseObj(body);
+//        System.out.println(result);
+        log.info("{} request {}; response {}", SecurityUtils.getCurrentUserPhoneByApp(), JSONUtil.toJsonStr(param), body);
+        if ("200".equals(result.getStr("code"))) {
+            String loginUrl = result.getStr("redirect_url");
+            if (ObjectUtil.isNotEmpty(loginUrl)) {
+                setUnionUrlByProduct(userId.toString(), product.getId().toString(), loginUrl);
+            }
+            return loginUrl;
+        }
+        return null;
+    }
+
+
+    public String getUnionUrlByProduct(String userId, String productId) {
+        String applyNumKey = RedisCacheKey.productUnionLinkKey(userId, productId);
+        String cacheCode = (String) redisUtils.get(applyNumKey);
+        return cacheCode;
+    }
+
+    public Boolean setUnionUrlByProduct(String userId, String productId, String url) {
+        String applyNumKey = RedisCacheKey.productUnionLinkKey(userId, productId);
+        //String cacheCode = (String) redisUtils.get(applyNumKey);
+        return redisUtils.set(applyNumKey, url);
     }
 }

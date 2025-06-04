@@ -12,10 +12,7 @@ import me.zhengjie.enums.BannerPageAndPosEnum;
 import me.zhengjie.repository.*;
 import me.zhengjie.result.ResultBuilder;
 import me.zhengjie.result.ResultModel;
-import me.zhengjie.service.BannerService;
-import me.zhengjie.service.ChannelService;
-import me.zhengjie.service.HxUserService;
-import me.zhengjie.service.IAccessService;
+import me.zhengjie.service.*;
 import me.zhengjie.service.dto.HxUserDto;
 import me.zhengjie.service.dto.HxUserDtoV2;
 import me.zhengjie.service.dto.ProductDto;
@@ -52,6 +49,7 @@ public class BannerServiceImpl implements BannerService {
 
     private final IAccessService accessService;
     private final ChannelService channelService;
+    private final ProductService productService;
 //    private final HxUserService hxUserService;
 
     private final HxUserRepository hxUserRepository;
@@ -227,7 +225,6 @@ public class BannerServiceImpl implements BannerService {
     public ResultModel toProductUrlV2(ParamBannerQuery paramBanner) {
         Long userId = SecurityUtils.getCurrentUserIdByApp();
 
-
         Long regChannelId = SecurityUtils.getRegChannelIdByApp();
         String regChannelName = SecurityUtils.getRegChannelNameByApp();
         Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
@@ -237,7 +234,8 @@ public class BannerServiceImpl implements BannerService {
             channel = channelOptional.get();//注册渠道
         } else {
             ///System.out.println("//登录渠道");
-            channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());;//登录渠道
+            channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
+            ;//登录渠道
         }
 
         Optional<Product> productOptional = productRepository.findById(paramBanner.getProductId());
@@ -248,7 +246,8 @@ public class BannerServiceImpl implements BannerService {
                 return ResultBuilder.fail("产品已经下架");
             }
             JSONObject dataMap = new JSONObject();
-            dataMap.put("url", product.getApplyLink());
+//            dataMap.put("url", product.getApplyLink());
+            dataMap.put("url", productService.hitLogin(product));
 
             //Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
             insertProductLog(userId, product, channel, paramBanner);
@@ -266,22 +265,46 @@ public class BannerServiceImpl implements BannerService {
         Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
         Channel channel = null;
         if (channelOptional.isPresent()) {
-            System.out.println("//注册渠道");
+            //System.out.println("//注册渠道");
             channel = channelOptional.get();//注册渠道
         } else {
-            System.out.println("//登录渠道");
-            channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());;//登录渠道
+            ///System.out.println("//登录渠道");
+            channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
+            //登录渠道
         }
 //        Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
-        if (ObjectUtil.isNotEmpty(productList) && productList.size() > 0) {
-            Product product = productList.get(0);
+        List<Product> filterList = productList.stream().filter(p -> {
+            return productService.checkProduct(p);
+        }).collect(Collectors.toList());
+        if (ObjectUtil.isNotEmpty(filterList) && filterList.size() > 0) {
+            Product product = filterList.get(0);
             JSONObject dataMap = new JSONObject();
-            dataMap.put("url", product.getApplyLink());
+//            dataMap.put("url", product.getApplyLink());
+            dataMap.put("url", productService.hitLogin(product));
             insertProductLog(userId, product, channel, paramBanner);
             return ResultBuilder.data(dataMap);
         } else {
             return ResultBuilder.fail("产品信息不存在");
+        }
+    }
+    @Override
+    public String findOneByLogin(ParamBannerQuery paramBanner) {
+        //Long userId = SecurityUtils.getCurrentUserIdByApp();
+        //Long regChannelId = SecurityUtils.getRegChannelIdByApp();
+        //Optional<Channel> channelOptional = channelRepository.findById(regChannelId);
+        Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
+        List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
+        List<Product> filterList = productList.stream().filter(p -> {
+            return productService.checkProduct(p);
+        }).collect(Collectors.toList());
+        if (ObjectUtil.isNotEmpty(filterList) && filterList.size() > 0) {
+            Product product = filterList.get(0);
+            String url = productService.hitLogin(product);
+            insertProductLog(paramBanner.getUserId(), product, channel, paramBanner);
+            return url;
+        } else {
+            return null;
         }
     }
 

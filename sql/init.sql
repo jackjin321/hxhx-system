@@ -115,6 +115,9 @@ CREATE TABLE `xf_channel` (
   PRIMARY KEY (`channel_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT COMMENT='渠道管理';
 
+alter table xf_channel_log
+add column `browser` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'browser' after platform;
+
 DROP TABLE IF EXISTS `xf_channel_log`;
 CREATE TABLE `xf_channel_log` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -140,6 +143,11 @@ CREATE TABLE `xf_channel_log` (
   KEY `index_device_id` (`device_id`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='渠道访问日志';
 
+alter table `xf_product`
+add column `product_type` varchar(32) DEFAULT 'uv' COMMENT '产品类型：uv，union' after `product_name`;
+
+alter table `xf_product`
+add column `product_code` varchar(32) DEFAULT NULL COMMENT '产品编号' after `product_type`;
 
 DROP TABLE IF EXISTS `xf_product`;
 CREATE TABLE `xf_product` (

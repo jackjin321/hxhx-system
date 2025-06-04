@@ -182,6 +182,7 @@ public class ChannelServiceImpl implements ChannelService {
                 channelLog.setIsLogin(false);
                 channelLog.setIsRegister(false);
 
+                channelLog.setBrowser(browser);//新增
                 channelLog.setPlatform(platform);//新增
                 channelLog.setDeviceId(deviceId);//新增
 
@@ -208,6 +209,7 @@ public class ChannelServiceImpl implements ChannelService {
         channelLog.setIsLogin(false);
         channelLog.setIsRegister(false);
 
+        channelLog.setBrowser(browser);//新增
         channelLog.setPlatform(platform);//新增
         channelLog.setDeviceId(deviceId);//新增
 

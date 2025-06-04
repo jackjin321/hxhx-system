@@ -30,6 +30,8 @@ public class ChannelLog extends XFBaseEntity  implements Comparable<ChannelLog> 
     private String channelName;
     private String regChannelName;//注册渠道
 
+    private String browser;
+
     private String platform;
 
     private String deviceId;

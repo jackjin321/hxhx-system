@@ -50,6 +50,15 @@ public class Product extends BaseEntity implements Serializable {
 
     private String priceType;
 
+    /**
+     * 产品类型
+     */
+    private String productType;
+    /**
+     * 产品编号
+     */
+    private String productCode;
+
     private String applyLink;
     /**
      * 状态 offShelves|下架，waitForOnShelves|等待上架，onShelves|上架

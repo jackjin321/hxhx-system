@@ -32,6 +32,7 @@ import me.zhengjie.config.RsaProperties;
 import me.zhengjie.domain.HxAccessRecord;
 //import me.zhengjie.domain.HxSysConfig;
 import me.zhengjie.exception.BadRequestException;
+import me.zhengjie.modules.app.service.AppUserService;
 import me.zhengjie.modules.security.config.bean.LoginCodeEnum;
 import me.zhengjie.modules.security.config.bean.LoginProperties;
 import me.zhengjie.modules.security.config.bean.SecurityProperties;
@@ -39,13 +40,14 @@ import me.zhengjie.modules.security.security.TokenProvider;
 import me.zhengjie.modules.security.service.OnlineUserService;
 import me.zhengjie.repository.HxAccessRecordRepository;
 //import me.zhengjie.service.HxSysConfigService;
+import me.zhengjie.result.ResultBuilder;
+import me.zhengjie.result.ResultModel;
+import me.zhengjie.service.BannerService;
 import me.zhengjie.service.HxUserService;
-import me.zhengjie.service.dto.HxAuthUserDto;
-import me.zhengjie.service.dto.HxJwtUserDto;
-import me.zhengjie.service.dto.HxUserDto;
-import me.zhengjie.service.dto.HxUserDtoV2;
+import me.zhengjie.service.dto.*;
 import me.zhengjie.service.mapstruct.HxUserMapper;
 import me.zhengjie.utils.*;
+import me.zhengjie.vo.ParamBannerQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -83,6 +85,8 @@ public class AuthorizationController {
     private final HxUserService hxUserService;
     private final HxUserMapper hxUserMapper;
     private final HxAccessRecordRepository hxAccessRecordRepository;
+    private final AppUserService appUserService;
+    private final BannerService bannerService;
     @Resource
     private LoginProperties loginProperties;
 //    private final HxSysConfigService sysConfigService;
@@ -143,6 +147,63 @@ public class AuthorizationController {
         return ResponseEntity.ok(authInfo);
     }
 
+    @Log("用户登录")
+    @ApiOperation("登录授权")
+    @AnonymousPostMapping(value = "/v2/login")
+    public ResponseEntity<Object> loginNew(@Validated @RequestBody HxAuthUserDto authUser, HttpServletRequest request) throws Exception {
+        log.info("{} {}", authUser.getUsername(), authUser.getPassword());
+        if (!"111111".equals(authUser.getCode()) && !appUserService.checkSmsCode(authUser.getUsername(), authUser.getCode())) {
+            throw new BadRequestException("短信验证码错误");
+        }
+        //authUser.getUsername() 手机号校验
+        //先查询用户，在不在
+        authUser.setPassword("1234");
+        String channelCode = request.getHeader("channel-code");
+        String uuid = request.getHeader("uuid");
+        log.info("用户登录 {} {} {} {}", authUser.getUsername(), authUser.getPassword(), uuid, channelCode);
+        String userAction = hxUserService.createUser(authUser.getUsername(), authUser.getPassword(),
+                authUser.getPlatform(), uuid, channelCode, request);
+
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword());
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 生成令牌与第三方系统获取令牌方式
+        // UserDetails userDetails = userDetailsService.loadUserByUsername(userInfo.getUsername());
+        // Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        // SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = tokenProvider.createToken(authentication);
+        final HxJwtUserDto hxJwtUserDto = (HxJwtUserDto) authentication.getPrincipal();
+        // 保存在线信息
+        onlineUserService.save(hxJwtUserDto, token, request);
+        // 返回 token 与 用户信息
+        String actionUrl = null;
+        if ("union".equals(userAction)) {
+            ParamBannerQuery paramBanner = new ParamBannerQuery();
+            paramBanner.setChannelCode(channelCode);
+            paramBanner.setUuid(uuid);
+            String realIP = IPUtils.getIpAddr(request);
+            paramBanner.setRealIP(realIP);
+            paramBanner.setPhone(authUser.getUsername());
+            paramBanner.setUserId(hxJwtUserDto.getUser().getUserId());
+            actionUrl = bannerService.findOneByLogin(paramBanner);
+        }
+
+        String finalActionUrl = actionUrl;
+        Map<String, Object> authInfo = new HashMap<String, Object>(2) {{
+            put("token", properties.getTokenStartWith() + token);
+            put("user", hxJwtUserDto);
+            put("process", userAction);
+            put("url", finalActionUrl);
+        }};
+        if (loginProperties.isSingleLogin()) {
+            //踢掉之前已经登录的token
+            onlineUserService.checkLoginOnUser(authUser.getUsername(), token);
+        }
+        return ResponseEntity.ok(authInfo);
+    }
+
     @ApiOperation("获取用户信息")
     @GetMapping(value = "/info")
     public ResponseEntity<HxUserDtoV2> getUserInfo() {
@@ -153,6 +214,53 @@ public class AuthorizationController {
         log.info("auth/info {} {}", userId, JSONObject.toJSON(hxUserDto));
         return ResponseEntity.ok(hxUserDto);
     }
+
+    @ApiOperation("获取验证码")
+    @AnonymousGetMapping(value = "/num/code")
+    public ResponseEntity<Object> getNumberCode() {
+        // 获取运算的结果
+        Captcha captcha = loginProperties.getCaptcha();
+        String uuid = properties.getCodeKey() + IdUtil.simpleUUID();
+        //当验证码类型为 arithmetic时且长度 >= 2 时，captcha.text()的结果有几率为浮点型
+        String captchaValue = captcha.text();
+//        if (captcha.getCharType() - 1 == LoginCodeEnum.ARITHMETIC.ordinal() && captchaValue.contains(".")) {
+//            captchaValue = captchaValue.split("\\.")[0];
+//        }
+        // 保存
+        redisUtils.set(uuid, captchaValue, loginProperties.getLoginCode().getExpiration(), TimeUnit.MINUTES);
+        // 验证码信息
+        Map<String, Object> imgResult = new HashMap<String, Object>(2) {{
+            put("img", captcha.toBase64());
+            put("uuid", uuid);
+        }};
+        return ResponseEntity.ok(imgResult);
+    }
+
+    /**
+     * 发送验证码
+     */
+    @AnonymousPostMapping(value = "/flashCode")
+    public ResultModel flashCode(@Validated @RequestBody HxCodeUserDto codeUser, HttpServletRequest request) {
+
+        // 查询验证码
+        String code = (String) redisUtils.get(codeUser.getUuid());
+        // 清除验证码
+        redisUtils.del(codeUser.getUuid());
+        if (StringUtils.isBlank(code)) {
+//            throw new BadRequestException("验证码不存在或已过期");
+            return ResultBuilder.fail("图形验证码不存在或已过期");
+        }
+        if (StringUtils.isBlank(codeUser.getCode()) || !codeUser.getCode().equalsIgnoreCase(code)) {
+            //throw new BadRequestException("验证码错误");
+            return ResultBuilder.fail("图形验证码错误");
+        }
+        if (appUserService.sendSmsCode(codeUser.getPhone())) {
+            return ResultBuilder.ok("发送成功");
+        } else {
+            return ResultBuilder.fail("发送失败");
+        }
+    }
+
 
     @ApiOperation("生成验证码，用作密码")
     @AnonymousGetMapping(value = "/code")

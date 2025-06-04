@@ -15,7 +15,7 @@ spring:
     database: ${REDIS_DB:14}
     host: ${REDIS_HOST:127.0.0.1}
     port: ${REDIS_PORT:6379}
-    password: ${REDIS_PWD:fooj232bared}
+#    password: ${REDIS_PWD:fooj232bared}
     #连接超时时间
     timeout: 5000
   datasource:
@@ -23,8 +23,8 @@ spring:
       db-type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
       url: jdbc:log4jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hxhx}?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false
-      username: ${DB_USER:root}
-      password: ${DB_PWD:Cj0dKF,wfKhua}
+      username: ${DB_USER:hxhx}
+      password: ${DB_PWD:TByBc2MkfJdaytJd}
       #Cj0dKF,/wfK,
       # 初始连接数
       initial-size: 15
@@ -138,8 +138,8 @@ file:
     path: ~/file/
     avatar: ~/avatar/
   linux:
-    path: /home/work/file/
-    avatar: /home/work/avatar/
+    path: /www/server/java/file/
+    avatar: /www/server/java/avatar/
   windows:
     path: C:\eladmin\file\
     avatar: C:\eladmin\avatar\
