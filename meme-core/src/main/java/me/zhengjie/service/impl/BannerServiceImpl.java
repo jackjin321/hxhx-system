@@ -246,8 +246,8 @@ public class BannerServiceImpl implements BannerService {
                 return ResultBuilder.fail("产品已经下架");
             }
             JSONObject dataMap = new JSONObject();
-//            dataMap.put("url", product.getApplyLink());
-            dataMap.put("url", productService.hitLogin(product));
+            dataMap.put("url", product.getApplyLink());
+//            dataMap.put("url", productService.hitLogin(product));
 
             //Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
             insertProductLog(userId, product, channel, paramBanner);
@@ -280,8 +280,8 @@ public class BannerServiceImpl implements BannerService {
         if (ObjectUtil.isNotEmpty(filterList) && filterList.size() > 0) {
             Product product = filterList.get(0);
             JSONObject dataMap = new JSONObject();
-//            dataMap.put("url", product.getApplyLink());
-            dataMap.put("url", productService.hitLogin(product));
+            dataMap.put("url", product.getApplyLink());
+//            dataMap.put("url", productService.hitLogin(product));
             insertProductLog(userId, product, channel, paramBanner);
             return ResultBuilder.data(dataMap);
         } else {

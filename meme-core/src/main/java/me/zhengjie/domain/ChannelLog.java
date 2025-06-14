@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Setter
 @DynamicUpdate
 @Table(name = "xf_channel_log")
-public class ChannelLog extends XFBaseEntity  implements Comparable<ChannelLog> {
+public class ChannelLog extends XFBaseEntity implements Comparable<ChannelLog> {
 
     private Long userId;
 
@@ -25,9 +25,11 @@ public class ChannelLog extends XFBaseEntity  implements Comparable<ChannelLog> 
     private String phoneMd5;
 
     private Long channelId;
+
     private Long regChannelId;//注册渠道
 
     private String channelName;
+
     private String regChannelName;//注册渠道
 
     private String browser;

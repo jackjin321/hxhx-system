@@ -4,9 +4,11 @@ package me.zhengjie.modules.app.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.XmlUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -20,6 +22,9 @@ import me.zhengjie.utils.SecurityUtils;
 import me.zhengjie.utils.StringUtils;
 import me.zhengjie.vo.MemberAuth;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +78,8 @@ public class AppUserServiceImpl implements AppUserService {
         String code = RandomUtil.randomNumber(6);
         log.info("code {}", code);
         //发送短信，需要重新找一个渠道
-        boolean flag = sendFanQin(phone, code);
+//        boolean flag = sendFanQin(phone, code);
+        boolean flag = sendFanQinV2(phone, code);
         if (flag) {
             redisUtils.del(RedisCacheKey.loginCodeKey(phone));
             // 保存
@@ -132,6 +138,46 @@ public class AppUserServiceImpl implements AppUserService {
         }
         //{"success":true,"respCode":"0000","respDesc":"请求成功。","smsId":"ia1868011096980733952","failList":[]}
         return false;
+    }
+
+    @Override
+    public boolean sendFanQinV2(String phone, String code) {
+        //return sendSms(phone, code, SmsEnum.FanQin);
+        //long currentTimeMillis = DateUtil.current();
+        //String sig = DigestUtil.md5Hex(String.format("%s%s%d", accountSid, authToken, currentTimeMillis));
+        Map<String, Object> param = new HashMap<>();
+        param.put("userid", 257);
+        param.put("account", "chxxyzm");
+        param.put("password", "123456Ch");
+        param.put("mobile", phone);
+        param.put("content", String.format("【臣禾信息】您的验证码为：%s，请在5分钟内输入，请勿转发或告知他人，谨防诈骗。", code));
+        param.put("action", "send");
+        param.put("sendTime", "");
+        param.put("extno", "");
+
+        HttpResponse response = HttpUtil.createPost("http://121.40.72.241:8868/sms.aspx").form(param).execute();
+
+        int status = response.getStatus();
+        String body = response.body();
+        //System.out.println(body);
+        log.info("{} request {}; response {}", phone, JSONUtil.toJsonStr(param), body);
+        Document document = XmlUtil.parseXml(body);
+        // 获取根元素
+        Element root = document.getDocumentElement();
+        // 获取<returnstatus>节点的内容
+        Node toNode = root.getElementsByTagName("returnstatus").item(0); // 获取第一个<to>节点
+        if (toNode != null && toNode.getNodeType() == Node.ELEMENT_NODE) {
+            Element toElement = (Element) toNode;
+            String returnStatus = toElement.getTextContent(); // 获取<to>节点的文本内容
+            System.out.println("To: " + returnStatus); // 输出结果
+            if ("Success".equals(returnStatus)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     @Override

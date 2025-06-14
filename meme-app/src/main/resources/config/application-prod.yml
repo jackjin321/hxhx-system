@@ -1,7 +1,7 @@
 server:
   port: 7890
   servlet:
-    context-path: /xfapi
+    context-path: /jhapi
   tomcat:
     #等待队列长度
     accept-count: 1000
@@ -14,19 +14,19 @@ server:
 spring:
   redis:
     #数据库索引
-    database: ${REDIS_DB:14}
+    database: ${REDIS_DB:11}
     host: ${REDIS_HOST:127.0.0.1}
     port: ${REDIS_PORT:6379}
-#    password: ${REDIS_PWD:fooj232bared}
+    password: ${REDIS_PWD:abc123456}
     #连接超时时间
     timeout: 5000
   datasource:
     druid:
       db-type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-      url: jdbc:log4jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hxhx}?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false
-      username: ${DB_USER:hxhx}
-      password: ${DB_PWD:TByBc2MkfJdaytJd}
+      url: jdbc:log4jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:jinhui}?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false
+      username: ${DB_USER:jinhui}
+      password: ${DB_PWD:YJNTSwtHTKi2Nnrk}
       # 初始连接数
       initial-size: 5
       # 最小连接数
@@ -139,8 +139,8 @@ file:
     path: ~/file/
     avatar: ~/avatar/
   linux:
-    path: /home/work/file/
-    avatar: /home/work/avatar/
+    path: /www/wwwroot/jinhui-image/file/
+    avatar: /www/wwwroot/jinhui-image/avatar/
   # 文件大小 /M
   maxSize: 100
   avatarMaxSize: 5
