@@ -16,7 +16,11 @@
             <groupId>com.meme.system</groupId>
             <artifactId>meme-common</artifactId>
             <version>2.6</version>
-
+        </dependency>
+        <dependency>
+            <groupId>com.meme.system</groupId>
+            <artifactId>meme-tools</artifactId>
+            <version>2.6</version>
         </dependency>
     </dependencies>
 

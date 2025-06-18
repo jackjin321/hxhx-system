@@ -26,6 +26,7 @@ import me.zhengjie.exception.EntityNotFoundException;
 import me.zhengjie.modules.system.repository.UserRepository;
 import me.zhengjie.modules.system.service.UserService;
 import me.zhengjie.modules.system.service.dto.*;
+import me.zhengjie.service.dto.*;
 import me.zhengjie.modules.system.service.mapstruct.UserLoginMapper;
 import me.zhengjie.modules.system.service.mapstruct.UserMapper;
 import me.zhengjie.utils.*;

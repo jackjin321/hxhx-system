@@ -57,6 +57,7 @@ public class ProductChart extends XFBaseEntity {
      * 产品单价
      */
     private BigDecimal price;
+    private BigDecimal profit;
 
     /**
      * 价格类型 1、uv 2、cpa

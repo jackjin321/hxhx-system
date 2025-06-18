@@ -5,16 +5,16 @@ import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.access.DateUtils;
 import me.zhengjie.domain.*;
-import me.zhengjie.repository.ChannelChartRepository;
-import me.zhengjie.repository.ChannelRepository;
-import me.zhengjie.repository.ProductLogRepository;
-import me.zhengjie.repository.ProductRepository;
+import me.zhengjie.exception.BadRequestException;
+import me.zhengjie.repository.*;
 import me.zhengjie.service.ChannelChartService;
 import me.zhengjie.service.ChannelLogService;
 import me.zhengjie.service.dto.ChannelQueryCriteria;
 import me.zhengjie.service.dto.AppQueryCriteria;
+import me.zhengjie.service.mapstruct.ChannelStatMapper;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
+import me.zhengjie.utils.SecurityUtils;
 import me.zhengjie.vo.ChannelLogVO;
 import me.zhengjie.vo.ProductLogVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +39,10 @@ public class ChannelChartServiceImpl implements ChannelChartService {
     private final ProductLogRepository productLogRepository;
 
     private final ProductRepository productRepository;
+
+    private final XfChannelUserRepository xfChannelUserRepository;
+
+    private final ChannelStatMapper channelStatMapper;
 
     @Autowired
     private ChannelLogService channelLogService;
@@ -90,9 +94,33 @@ public class ChannelChartServiceImpl implements ChannelChartService {
     }
 
     @Override
-    public Map<String, Object> findByQueryToday(ChannelQueryCriteria criteria, Pageable pageable) {
+    public Map<String, Object> findByQueryStatToday(ChannelQueryCriteria criteria, Pageable pageable) {
+        Long sysUserId = SecurityUtils.getCurrentUserId();
+
+        XfChannelUser channelUser = xfChannelUserRepository.findBySysUserId(sysUserId);
+        if (ObjectUtil.isNull(channelUser)) {
+            throw new BadRequestException("系统错误");
+        }
+        criteria.setId(channelUser.getChannelId());
+//        System.out.println(criteria);
         Page<Channel> channelPage = channelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
-//        LocalDate localDate = DateUtils.nowLocalDate();
+
+        Date ddd = new Date();//当天结算
+        Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
+        Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
+        Map<Long, BigDecimal> productMap = productRepository.findAll().stream().collect(Collectors.toMap(Product::getId, Product::getPrice));
+        Page<ChannelChart> channelChartPage = channelPage.map(p -> createChart(startTime, endTime, p, productMap));
+
+        List<ChannelChart> channelChartList = channelChartPage.toList().stream().sorted(Comparator.comparing(ChannelChart::getTodayUv,
+                Comparator.reverseOrder())).collect(Collectors.toList());
+        return PageUtil.toPage(channelStatMapper.toDto(channelChartList),
+                channelChartPage.getTotalElements());
+    }
+
+    @Override
+    public Map<String, Object> findByQueryToday(ChannelQueryCriteria criteria, Pageable pageable) {
+
+        Page<Channel> channelPage = channelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
         Date ddd = new Date();//当天结算
         Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
         Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
@@ -100,8 +128,24 @@ public class ChannelChartServiceImpl implements ChannelChartService {
         Page<ChannelChart> channelChartPage = channelPage.map(p -> createChart(startTime, endTime, p, productMap));
 
         return PageUtil.toPage(channelChartPage.toList().stream().sorted(Comparator.comparing(ChannelChart::getTodayUv,
-                Comparator.reverseOrder())).collect(Collectors.toList()),
+                        Comparator.reverseOrder())).collect(Collectors.toList()),
                 channelChartPage.getTotalElements());
+    }
+
+    @Override
+    public Map<String, Object> findByQueryStatHistory(ChannelQueryCriteria criteria, Pageable pageable) {
+
+        Long sysUserId = SecurityUtils.getCurrentUserId();
+
+        XfChannelUser channelUser = xfChannelUserRepository.findBySysUserId(sysUserId);
+        if (ObjectUtil.isNull(channelUser)) {
+            throw new BadRequestException("系统错误");
+        }
+        criteria.setChannelId(channelUser.getChannelId());
+
+        Page<ChannelChart> page = channelChartRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
+//        return PageUtil.toPage(page);
+        return PageUtil.toPage(page.map(channelStatMapper::toDto));
     }
 
     @Override

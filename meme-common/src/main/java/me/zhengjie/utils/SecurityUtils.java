@@ -64,12 +64,18 @@ public class SecurityUtils {
 
     /**
      * 获取系统用户ID
+     *
      * @return 系统用户ID
      */
-//    public static Long getCurrentUserId() {
-//        UserDetails userDetails = getCurrentUser();
-//        return new JSONObject(new JSONObject(userDetails).get("user")).get("id", Long.class);
-//    }
+    public static Long getCurrentUserId() {
+        UserDetails userDetails = getCurrentUser();
+        return new JSONObject(new JSONObject(userDetails).get("user")).get("id", Long.class);
+    }
+
+    public static Integer getCurrentUserType() {
+        UserDetails userDetails = getCurrentUser();
+        return new JSONObject(new JSONObject(userDetails).get("user")).get("userType", Integer.class);
+    }
 
     public static String getCurrentUserPhoneByApp() {
         UserDetails userDetails = getCurrentUser();

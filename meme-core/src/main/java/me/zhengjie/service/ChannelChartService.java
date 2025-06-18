@@ -12,8 +12,10 @@ import java.util.Map;
 
 public interface ChannelChartService {
 
+    Map<String, Object> findByQueryStatToday(ChannelQueryCriteria criteria, Pageable pageable);
     Map<String, Object> findByQueryToday(ChannelQueryCriteria criteria, Pageable pageable);
 
+    Map<String, Object> findByQueryStatHistory(ChannelQueryCriteria criteria, Pageable pageable);
     Map<String, Object> findByQueryHistory(ChannelQueryCriteria criteria, Pageable pageable);
 
 //    List<ChannelChart> queryAll(ChannelQueryCriteria criteria);

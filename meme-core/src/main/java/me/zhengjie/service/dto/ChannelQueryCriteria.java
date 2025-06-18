@@ -18,7 +18,11 @@ public class ChannelQueryCriteria {
     @Query(type = Query.Type.INNER_LIKE)
     private Long channelId;
 
+    @Query(type = Query.Type.EQUAL)
+    private Long id;
+
     private Integer page;
+
     private Integer limit;
 
 

@@ -44,6 +44,11 @@ public class User extends BaseEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(value = "ID", hidden = true)
     private Long id;
+    /**
+     * 账号类型：渠道用户
+     */
+    @ApiModelProperty(value = "用户类型", hidden = true)
+    private Integer userType;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @ApiModelProperty(value = "用户角色")

@@ -4,7 +4,8 @@ spring:
   profiles:
     active: dev
   jackson:
-    time-zone: GMT+8
+#    time-zone: GMT+8
+    time-zone: Asia/Shanghai
   data:
     redis:
       repositories:

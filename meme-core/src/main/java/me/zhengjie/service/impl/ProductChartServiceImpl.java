@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
@@ -44,6 +45,7 @@ public class ProductChartServiceImpl implements ProductChartService {
         totalChart.setTodayUv(Long.valueOf("0"));
         totalChart.setTodayPv(Long.valueOf("0"));
         totalChart.setFirstTo(Long.valueOf("0"));
+        totalChart.setProfit(BigDecimal.ZERO);
         Date ddd = new Date();//当天结算
         Timestamp startTime = new Timestamp(DateUtil.beginOfDay(ddd).getTime());
         Timestamp endTime = new Timestamp(DateUtil.endOfDay(ddd).getTime());
@@ -52,6 +54,7 @@ public class ProductChartServiceImpl implements ProductChartService {
             totalChart.setTodayPv(totalChart.getTodayPv() + promoteChart.getTodayPv());
             totalChart.setTodayUv(totalChart.getTodayUv() + promoteChart.getTodayUv());
             totalChart.setFirstTo(totalChart.getFirstTo() + promoteChart.getFirstTo());
+            totalChart.setProfit(totalChart.getProfit().add(promoteChart.getProfit()));
         });
         return totalChart;
     }
@@ -67,7 +70,7 @@ public class ProductChartServiceImpl implements ProductChartService {
         Page<ProductChart> productChartPage = productPage.map(p -> createChart(startTime, endTime, p));
 
         return PageUtil.toPage(productChartPage.toList().stream().sorted(Comparator.comparing(ProductChart::getTodayUv,
-                Comparator.reverseOrder())).collect(Collectors.toList()),
+                        Comparator.reverseOrder())).collect(Collectors.toList()),
                 productChartPage.getTotalElements());
     }
 
@@ -96,7 +99,7 @@ public class ProductChartServiceImpl implements ProductChartService {
         List<String> accessIps = promoteLogList.stream().map(ProductLog::getAccessIp).collect(Collectors.toList());
         List<String> abcIps = accessIps.stream().distinct().collect(Collectors.toList());
 
-        List<ProductLogVO> productLogVOList = promoteLogList.stream().map(p->{
+        List<ProductLogVO> productLogVOList = promoteLogList.stream().map(p -> {
             ProductLogVO productLogVO = new ProductLogVO();
             productLogVO.setUserId(p.getUserId());
             productLogVO.setProductId(p.getProductId());
@@ -119,12 +122,12 @@ public class ProductChartServiceImpl implements ProductChartService {
         promoteChart.setFirstTo(firstToCount);
         promoteChart.setPrice(product.getPrice());
 
-//        BigDecimal profit = BigDecimal.valueOf(promoteLogSet.size()).multiply(new BigDecimal(product.getPrice()));
-//        promoteChart.setProfit(profit);
-
-//        if (product.getPriceType().equals(2)) {
-//            promoteChart.setProfit(BigDecimal.ZERO);
-//        }
+        if (product.getPriceType().equals("uv")) {
+            BigDecimal profit = BigDecimal.valueOf(promoteChart.getTodayUv()).multiply(product.getPrice());
+            promoteChart.setProfit(profit);
+        } else {
+            promoteChart.setProfit(BigDecimal.ZERO);
+        }
         return promoteChart;
     }
 }
