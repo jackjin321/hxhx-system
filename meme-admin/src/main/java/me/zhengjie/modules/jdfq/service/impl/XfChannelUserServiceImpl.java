@@ -1,18 +1,18 @@
 /*
-*  Copyright 2019-2020 Zheng Jie
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*  http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-*/
+ *  Copyright 2019-2020 Zheng Jie
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package me.zhengjie.modules.jdfq.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
@@ -47,11 +47,11 @@ import javax.servlet.http.HttpServletResponse;
 
 
 /**
-* @website https://eladmin.vip
-* @description 服务实现
-* @author zhengjie
-* @date 2025-06-15
-**/
+ * @author zhengjie
+ * @website https://eladmin.vip
+ * @description 服务实现
+ * @date 2025-06-15
+ **/
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -68,21 +68,21 @@ public class XfChannelUserServiceImpl implements XfChannelUserService {
     private final JobRepository jobRepository;
 
     @Override
-    public Map<String,Object> queryAll(XfChannelUserQueryCriteria criteria, Pageable pageable){
-        Page<XfChannelUser> page = xfChannelUserRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+    public Map<String, Object> queryAll(XfChannelUserQueryCriteria criteria, Pageable pageable) {
+        Page<XfChannelUser> page = xfChannelUserRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder), pageable);
         return PageUtil.toPage(page.map(xfChannelUserMapper::toDto));
     }
 
     @Override
-    public List<XfChannelUserDto> queryAll(XfChannelUserQueryCriteria criteria){
-        return xfChannelUserMapper.toDto(xfChannelUserRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+    public List<XfChannelUserDto> queryAll(XfChannelUserQueryCriteria criteria) {
+        return xfChannelUserMapper.toDto(xfChannelUserRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria, criteriaBuilder)));
     }
 
     @Override
     @Transactional
     public XfChannelUserDto findById(Long id) {
         XfChannelUser xfChannelUser = xfChannelUserRepository.findById(id).orElseGet(XfChannelUser::new);
-        ValidationUtil.isNull(xfChannelUser.getId(),"XfChannelUser","id",id);
+        ValidationUtil.isNull(xfChannelUser.getId(), "XfChannelUser", "id", id);
         return xfChannelUserMapper.toDto(xfChannelUser);
     }
 
@@ -141,9 +141,22 @@ public class XfChannelUserServiceImpl implements XfChannelUserService {
     @Transactional(rollbackFor = Exception.class)
     public void update(XfChannelUser resources) {
         XfChannelUser xfChannelUser = xfChannelUserRepository.findById(resources.getId()).orElseGet(XfChannelUser::new);
-        ValidationUtil.isNull( xfChannelUser.getId(),"XfChannelUser","id",resources.getId());
+        ValidationUtil.isNull(xfChannelUser.getId(), "XfChannelUser", "id", resources.getId());
         xfChannelUser.copy(resources);
         xfChannelUserRepository.save(xfChannelUser);
+
+        if (ObjectUtil.isNotEmpty(resources.getPassword())) {
+            //修改sys_user表
+            Optional<User> userOptional = userRepository.findById(xfChannelUser.getSysUserId());
+            if (!userOptional.isPresent()) {
+                throw new BadRequestException("用户异常");
+            }
+            User sysUser = userOptional.get();
+            String password = passwordEncoder.encode(resources.getPassword());
+            sysUser.setPassword(password);
+            userRepository.save(sysUser);
+        }
+
     }
 
     @Override

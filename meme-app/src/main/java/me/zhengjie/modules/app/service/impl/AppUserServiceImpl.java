@@ -71,7 +71,7 @@ public class AppUserServiceImpl implements AppUserService {
         // 保存
         double count = redisUtils.hincr("FLASH_CODE", phone, 1L);
         log.info("count {}", count);
-        if (count > 10) {
+        if (count > 50) {
             return false;
         }
 

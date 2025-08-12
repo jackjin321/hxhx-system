@@ -4,50 +4,66 @@ CREATE TABLE `xf_channel_user`
     `id`          bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
     `channel_id`  bigint NOT NULL COMMENT '渠道Id',
     `sys_user_id` bigint NOT NULL COMMENT 'sys_user_id',
-    `username` varchar(255) DEFAULT NULL COMMENT '用户名',
-    `phone` varchar(255) DEFAULT NULL COMMENT '手机号码',
-    `password` varchar(255) DEFAULT NULL COMMENT '密码',
-    `status` tinyint(1) DEFAULT '0' COMMENT '登录状态',
+    `username`    varchar(255) DEFAULT NULL COMMENT '用户名',
+    `phone`       varchar(255) DEFAULT NULL COMMENT '手机号码',
+    `password`    varchar(255) DEFAULT NULL COMMENT '密码',
+    `status`      tinyint(1) DEFAULT '0' COMMENT '登录状态',
 
-    `create_by`   varchar(255)                                                   DEFAULT NULL COMMENT '创建者',
-    `update_by`   varchar(255)                                                   DEFAULT NULL COMMENT '更新者',
-    `create_time` datetime                                                       DEFAULT NULL COMMENT '创建日期',
-    `update_time` datetime                                                       DEFAULT NULL COMMENT '更新时间',
+    `create_by`   varchar(255) DEFAULT NULL COMMENT '创建者',
+    `update_by`   varchar(255) DEFAULT NULL COMMENT '更新者',
+    `create_time` datetime     DEFAULT NULL COMMENT '创建日期',
+    `update_time` datetime     DEFAULT NULL COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT COMMENT='渠道用户';
 
 alter table `sys_user`
     add column `user_type` int(4) DEFAULT '0' COMMENT '0系统用户，1渠道用户' after `is_admin`;
 
-CREATE TABLE `sys_user` (
-                            `user_id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
-                            `dept_id` bigint DEFAULT NULL COMMENT '部门名称',
-                            `username` varchar(255) DEFAULT NULL COMMENT '用户名',
-                            `nick_name` varchar(255) DEFAULT NULL COMMENT '昵称',
-                            `gender` varchar(2) DEFAULT NULL COMMENT '性别',
-                            `phone` varchar(255) DEFAULT NULL COMMENT '手机号码',
-                            `email` varchar(255) DEFAULT NULL COMMENT '邮箱',
-                            `avatar_name` varchar(255) DEFAULT NULL COMMENT '头像地址',
-                            `avatar_path` varchar(255) DEFAULT NULL COMMENT '头像真实路径',
-                            `password` varchar(255) DEFAULT NULL COMMENT '密码',
-                            `is_admin` bit(1) DEFAULT b'0' COMMENT '是否为admin账号',
-                            `enabled` bigint DEFAULT NULL COMMENT '状态：1启用、0禁用',
-                            `create_by` varchar(255) DEFAULT NULL COMMENT '创建者',
-                            `update_by` varchar(255) DEFAULT NULL COMMENT '更新者',
-                            `pwd_reset_time` datetime DEFAULT NULL COMMENT '修改密码的时间',
-                            `create_time` datetime DEFAULT NULL COMMENT '创建日期',
-                            `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                            PRIMARY KEY (`user_id`) USING BTREE,
-                            UNIQUE KEY `UK_kpubos9gc2cvtkb0thktkbkes` (`email`) USING BTREE,
-                            UNIQUE KEY `username` (`username`) USING BTREE,
-                            UNIQUE KEY `uniq_username` (`username`),
-                            UNIQUE KEY `uniq_email` (`email`),
-                            KEY `FK5rwmryny6jthaaxkogownknqp` (`dept_id`) USING BTREE,
-                            KEY `FKpq2dhypk2qgt68nauh2by22jb` (`avatar_name`) USING BTREE,
-                            KEY `inx_enabled` (`enabled`)
+CREATE TABLE `sys_user`
+(
+    `user_id`        bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `dept_id`        bigint       DEFAULT NULL COMMENT '部门名称',
+    `username`       varchar(255) DEFAULT NULL COMMENT '用户名',
+    `nick_name`      varchar(255) DEFAULT NULL COMMENT '昵称',
+    `gender`         varchar(2)   DEFAULT NULL COMMENT '性别',
+    `phone`          varchar(255) DEFAULT NULL COMMENT '手机号码',
+    `email`          varchar(255) DEFAULT NULL COMMENT '邮箱',
+    `avatar_name`    varchar(255) DEFAULT NULL COMMENT '头像地址',
+    `avatar_path`    varchar(255) DEFAULT NULL COMMENT '头像真实路径',
+    `password`       varchar(255) DEFAULT NULL COMMENT '密码',
+    `is_admin`       bit(1)       DEFAULT b'0' COMMENT '是否为admin账号',
+    `enabled`        bigint       DEFAULT NULL COMMENT '状态：1启用、0禁用',
+    `create_by`      varchar(255) DEFAULT NULL COMMENT '创建者',
+    `update_by`      varchar(255) DEFAULT NULL COMMENT '更新者',
+    `pwd_reset_time` datetime     DEFAULT NULL COMMENT '修改密码的时间',
+    `create_time`    datetime     DEFAULT NULL COMMENT '创建日期',
+    `update_time`    datetime     DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`user_id`) USING BTREE,
+    UNIQUE KEY `UK_kpubos9gc2cvtkb0thktkbkes` (`email`) USING BTREE,
+    UNIQUE KEY `username` (`username`) USING BTREE,
+    UNIQUE KEY `uniq_username` (`username`),
+    UNIQUE KEY `uniq_email` (`email`),
+    KEY              `FK5rwmryny6jthaaxkogownknqp` (`dept_id`) USING BTREE,
+    KEY              `FKpq2dhypk2qgt68nauh2by22jb` (`avatar_name`) USING BTREE,
+    KEY              `inx_enabled` (`enabled`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT COMMENT='系统用户';
 
 
+CREATE TABLE `xf_product_channel_filter`
+(
+    `id`        bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `product_id`   bigint NOT NULL COMMENT '产品id',
+    `product_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '产品名称',
+    `channel_id`   bigint NOT NULL COMMENT '渠道Id',
+    `channel_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '渠道名称',
+
+    `create_by`   varchar(255) DEFAULT NULL COMMENT '创建者',
+    `update_by`   varchar(255) DEFAULT NULL COMMENT '更新者',
+    `create_time` datetime     DEFAULT NULL COMMENT '创建日期',
+    `update_time` datetime     DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `un_product_id_channel_id` (`product_id`,`channel_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='产品渠道过滤表';
 
 
 DROP TABLE IF EXISTS `xf_banner`;
@@ -139,7 +155,7 @@ CREATE TABLE `xf_product_chart`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='产品统计';
 
 alter table `xf_product_chart`
-add column `profit`        decimal(10, 4) unsigned NOT NULL DEFAULT '0.0000' COMMENT '产品收益' after `first_to`;
+    add column `profit` decimal(10, 4) unsigned NOT NULL DEFAULT '0.0000' COMMENT '产品收益' after `first_to`;
 
 alter table `xf_channel`
     add column `port_status` varchar(255) DEFAULT NULL COMMENT 'AB面，A，B' after channel_code;
