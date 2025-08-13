@@ -32,6 +32,7 @@ import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.domain.Product;
 import me.zhengjie.repository.ChannelRepository;
 import me.zhengjie.repository.HxUserReportRepository;
+import me.zhengjie.repository.ProductChannelFilterRepository;
 import me.zhengjie.repository.ProductRepository;
 import me.zhengjie.service.ChannelService;
 import me.zhengjie.service.IAccessService;
@@ -42,6 +43,7 @@ import me.zhengjie.service.dto.AppQueryCriteria;
 import me.zhengjie.utils.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
     private final FileProperties properties;
     private final ChannelService channelService;
     private final HxUserReportRepository hxUserReportRepository;
-
+    private final ProductChannelFilterRepository productChannelFilterRepository;
     @Resource
     private RedisUtils redisUtils;
 
@@ -138,7 +140,8 @@ public class ProductServiceImpl implements ProductService {
         criteria.setPortStatus(portStatus);
         criteria.setStatus("onShelves");
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(portStatus, "onShelves");
-        List<Product> filterList = productList.stream().filter(p -> {
+        List<Product> filterProductList = productList.stream().filter(product -> checkChannelFilter(product, channel)).collect(Collectors.toList());
+        List<Product> filterList = filterProductList.stream().filter(p -> {
             return checkProduct(p);
         }).collect(Collectors.toList());
         return productMapper.toDto(filterList).stream().map(p -> {
@@ -276,6 +279,15 @@ public class ProductServiceImpl implements ProductService {
                 return false;
             }
         }
+    }
+
+    @Override
+    public Boolean checkChannelFilter(Product product, Channel channel) {
+        int exist = productChannelFilterRepository.countByProductIdAndChannelId(product.getId(), channel.getId());
+        if (exist > 0) {
+            return false;
+        }
+        return true;
     }
 
     private Boolean checkHit(Product product) {

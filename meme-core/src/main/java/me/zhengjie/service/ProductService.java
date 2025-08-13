@@ -15,6 +15,7 @@
  */
 package me.zhengjie.service;
 
+import me.zhengjie.domain.Channel;
 import me.zhengjie.domain.HxUserReport;
 import me.zhengjie.domain.Product;
 import me.zhengjie.result.ResultModel;
@@ -37,6 +38,7 @@ import java.util.Set;
 public interface ProductService {
 
     Boolean checkProduct(Product product);
+    Boolean checkChannelFilter(Product product, Channel channel);
     String hitLogin(Product product);
     String getPortStatus(HxUserReport userReport);
 

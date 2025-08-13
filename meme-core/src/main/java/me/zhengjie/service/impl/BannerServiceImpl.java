@@ -274,7 +274,9 @@ public class BannerServiceImpl implements BannerService {
         }
 //        Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
-        List<Product> filterList = productList.stream().filter(p -> {
+        Channel channelFinal = channel;
+        List<Product> filterProductList = productList.stream().filter(product -> productService.checkChannelFilter(product, channelFinal)).collect(Collectors.toList());
+        List<Product> filterList = filterProductList.stream().filter(p -> {
             return productService.checkProduct(p);
         }).collect(Collectors.toList());
         if (ObjectUtil.isNotEmpty(filterList) && filterList.size() > 0) {

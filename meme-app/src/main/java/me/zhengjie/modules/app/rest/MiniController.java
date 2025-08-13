@@ -53,9 +53,7 @@ public class MiniController {
 
     private final ProductService productService;
     private final ChannelService channelService;
-
     private final BannerService bannerService;
-
     private final AppUserService appUserService;
     private final HxSysConfigService sysConfigService;
     private final HxUserReportRepository hxUserReportRepository;
