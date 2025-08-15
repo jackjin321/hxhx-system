@@ -22,7 +22,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
 
-
+#sr:
+#  thread-pool:
+#    match:
+#      core-size: 50
+#      max-size: 100
+#      queue-size: 2000
 
 task:
   pool:

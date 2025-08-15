@@ -22,6 +22,9 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import me.zhengjie.domain.HxUser;
+import me.zhengjie.union.handler.AbstractProductDbMatchHandler;
+import me.zhengjie.union.holder.LoanProductMatchHandlerHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.access.RedisCacheKey;
@@ -30,6 +33,7 @@ import me.zhengjie.domain.Channel;
 import me.zhengjie.domain.HxUserReport;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.domain.Product;
+import me.zhengjie.exception.CommentException;
 import me.zhengjie.repository.ChannelRepository;
 import me.zhengjie.repository.HxUserReportRepository;
 import me.zhengjie.repository.ProductChannelFilterRepository;
@@ -40,6 +44,9 @@ import me.zhengjie.service.ProductService;
 import me.zhengjie.service.dto.ProductDto;
 import me.zhengjie.service.mapstruct.ProductMapper;
 import me.zhengjie.service.dto.AppQueryCriteria;
+import me.zhengjie.union.handler.AbstractProductDbMatchHandler;
+import me.zhengjie.union.vo.MatchResp;
+import me.zhengjie.union.vo.RegisterResp;
 import me.zhengjie.utils.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -142,7 +149,8 @@ public class ProductServiceImpl implements ProductService {
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(portStatus, "onShelves");
         List<Product> filterProductList = productList.stream().filter(product -> checkChannelFilter(product, channel)).collect(Collectors.toList());
         List<Product> filterList = filterProductList.stream().filter(p -> {
-            return checkProduct(p);
+            log.info("check product {} ", p.getProductName());
+            return checkProduct(p, channel);
         }).collect(Collectors.toList());
         return productMapper.toDto(filterList).stream().map(p -> {
             p.setApplyNum(this.getApplyNum(p.getId().toString()));
@@ -269,17 +277,82 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Boolean checkProduct(Product product) {
+    public Boolean checkProduct(Product product, Channel channel) {
         if ("uv".equals(product.getProductType())) {
             return true;
         } else {
             if ("zxh".equals(product.getProductCode())) {
                 return checkHit(product);
             } else {
+                AbstractProductDbMatchHandler<?> handler = LoanProductMatchHandlerHolder.getHandler(product.getProductCode());
+                if (Objects.isNull(handler)) {
+                    // 未配置联登处理器
+                    log.error("未配置联登处理器 {}", product.getProductCode());
+                    //throw new CommentException("未配置处理器,请联系商务");
+                    return false;
+                }
+                Long userId = SecurityUtils.getCurrentUserIdByApp();
+                String loginUrl = getUnionUrlByProduct(userId.toString(), product.getId().toString());
+                if (ObjectUtil.isNotEmpty(loginUrl)) {
+                    log.info("{} {} loginUrl {}",product.getId(), product.getProductName(), loginUrl);
+                    return true;
+                }
+                HxUser user = new HxUser();
+                user.setUserId(SecurityUtils.getCurrentUserIdByApp());
+                user.setPhone(SecurityUtils.getCurrentUserPhoneByApp());
+                user.setChannelId(channel.getId());
+                user.setPhoneMd5(DigestUtil.md5Hex(SecurityUtils.getCurrentUserPhoneByApp()));
+                MatchResp resp = handler.matchAction(product, user);
+                log.info("MatchResp {}", resp.isSucceed());
+                if (resp.isSucceed()) {
+                    return true;
+                }
                 return false;
             }
         }
     }
+
+    @Override
+    public String loginProduct(Product product, Channel channel) {
+        Long userId = SecurityUtils.getCurrentUserIdByApp();
+        String loginUrl = getUnionUrlByProduct(userId.toString(), product.getId().toString());
+        if (ObjectUtil.isNotEmpty(loginUrl)) {
+            return loginUrl;
+        }
+        if ("uv".equals(product.getProductType())) {
+            return product.getApplyLink();
+        } else if ("union".equals(product.getProductType())) {
+            AbstractProductDbMatchHandler<?> handler = LoanProductMatchHandlerHolder.getHandler(product.getProductCode());
+            if (Objects.isNull(handler)) {
+                // 未配置联登处理器
+                log.error("未配置联登处理器 {}", product.getProductCode());
+                //throw new CommentException("未配置处理器,请联系商务");
+                return null;
+            }
+            HxUser user = new HxUser();
+            user.setUserId(SecurityUtils.getCurrentUserIdByApp());
+            user.setPhone(SecurityUtils.getCurrentUserPhoneByApp());
+            user.setChannelId(channel.getId());
+            user.setPhoneMd5(DigestUtil.md5Hex(SecurityUtils.getCurrentUserPhoneByApp()));
+            RegisterResp resp = handler.registerAction(product, user);
+            log.info("MatchResp {}", resp.isSucceed());
+            if (resp.isSucceed()) {
+                setUnionUrlByProduct(userId.toString(), product.getId().toString(), resp.getRedirectUrl());
+                return resp.getRedirectUrl();
+            }
+        }
+
+//        log.info("{} request {}; response {}", SecurityUtils.getCurrentUserPhoneByApp(), JSONUtil.toJsonStr(param), body);
+//        if ("200".equals(result.getStr("code"))) {
+//            String loginUrl = result.getStr("redirect_url");
+//            if (ObjectUtil.isNotEmpty(loginUrl)) {
+//                setUnionUrlByProduct(userId.toString(), product.getId().toString(), loginUrl);
+//            }
+//            return loginUrl;
+//        }
+        return null;
+    }
+
 
     @Override
     public Boolean checkChannelFilter(Product product, Channel channel) {

@@ -16,6 +16,7 @@ import javax.persistence.*;
 public class ProductLog extends XFBaseEntity implements Comparable<ProductLog> {
 
     private Long userId;
+
     private String uuid;
     /**
      * 用户状态，新用户，老用户

@@ -17,6 +17,7 @@ package me.zhengjie.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.access.ChannelObject;
@@ -174,6 +175,7 @@ public class HxUserServiceImpl implements HxUserService {
             hxUser.setPlatform(platform);
             hxUser.setUsername(phone);
             hxUser.setPhone(phone);
+            hxUser.setPhoneMd5(DigestUtil.md5Hex(phone));
             hxUser.setPassword(passwordEncoder.encode(password));
             hxUser.setEnabled(true);
             hxUser.setRegisterTime(new Date());

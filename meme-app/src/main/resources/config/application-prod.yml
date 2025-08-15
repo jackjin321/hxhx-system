@@ -145,3 +145,17 @@ file:
   maxSize: 100
   avatarMaxSize: 5
   urlPrefix: http://121.196.210.153:7090/xfapi/file/image/
+
+#正式撞库http://xx.yxzjcn.com:18082/api/autoLogin/common/check   联登http://xx.yxzjcn.com:18082/api/autoLogin/common/login 渠道代码iekgqk
+loan:
+  product:
+    config:
+      cxh:
+        app-key: iekgqk
+        app-Secret: abc
+        app-iv: abc
+        rsa-public-key: abc
+        rsa-private-key: abc
+        other: abc
+        match-url: http://xx.yxzjcn.com:18082/api/autoLogin/common/check
+        register-url: http://xx.yxzjcn.com:18082/api/autoLogin/common/login

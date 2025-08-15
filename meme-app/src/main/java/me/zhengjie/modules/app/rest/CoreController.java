@@ -8,13 +8,11 @@ import me.zhengjie.annotation.rest.AnonymousGetMapping;
 import me.zhengjie.annotation.rest.AnonymousPostMapping;
 import me.zhengjie.domain.Channel;
 import me.zhengjie.domain.HxSysConfig;
-import me.zhengjie.domain.HxUser;
 import me.zhengjie.domain.HxUserReport;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.app.service.AppUserService;
 import me.zhengjie.modules.util.TestClient_V2;
 import me.zhengjie.repository.HxUserReportRepository;
-import me.zhengjie.result.ResultBuilder;
 import me.zhengjie.result.ResultModel;
 import me.zhengjie.service.BannerService;
 import me.zhengjie.service.ChannelService;
@@ -34,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,7 +46,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/mini")
 @Slf4j
-public class MiniController {
+public class CoreController {
 
     private final ProductService productService;
     private final ChannelService channelService;

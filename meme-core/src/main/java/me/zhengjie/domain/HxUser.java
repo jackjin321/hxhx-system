@@ -61,6 +61,8 @@ public class HxUser extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "手机号码")
     private String phone;
 
+    private String phoneMd5;
+
 
     @Column(name = "`password`")
     @ApiModelProperty(value = "密码")

@@ -57,6 +57,9 @@ CREATE TABLE `hx_user_report` (
 alter table `hx_user`
 add column `platform` varchar(32) DEFAULT NULL COMMENT '平台类型，ios，android' after `user_id`;
 
+alter table `hx_user`
+add column `phone_md5`       varchar(32) DEFAULT NULL COMMENT 'phoneMd5' after `phone`;
+
 DROP TABLE IF EXISTS `hx_user`;
 CREATE TABLE `hx_user` (
   `user_id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -66,6 +69,7 @@ CREATE TABLE `hx_user` (
   `username` varchar(255) DEFAULT NULL COMMENT '用户名',
   `nick_name` varchar(255) DEFAULT NULL COMMENT '昵称',
   `phone` varchar(255) DEFAULT NULL COMMENT '手机号码',
+  `phone_md5`       varchar(32) DEFAULT NULL COMMENT 'phoneMd5',
   `password` varchar(255) DEFAULT NULL COMMENT '密码',
   `enabled` tinyint DEFAULT '1' COMMENT '状态：1启用、0禁用',
   `register_time` datetime DEFAULT NULL COMMENT '注册时间',

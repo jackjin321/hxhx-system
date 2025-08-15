@@ -51,16 +51,16 @@ CREATE TABLE `sys_user`
 
 CREATE TABLE `xf_product_channel_filter`
 (
-    `id`        bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `product_id`   bigint NOT NULL COMMENT '产品id',
+    `id`           bigint                                                        NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `product_id`   bigint                                                        NOT NULL COMMENT '产品id',
     `product_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '产品名称',
-    `channel_id`   bigint NOT NULL COMMENT '渠道Id',
+    `channel_id`   bigint                                                        NOT NULL COMMENT '渠道Id',
     `channel_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '渠道名称',
 
-    `create_by`   varchar(255) DEFAULT NULL COMMENT '创建者',
-    `update_by`   varchar(255) DEFAULT NULL COMMENT '更新者',
-    `create_time` datetime     DEFAULT NULL COMMENT '创建日期',
-    `update_time` datetime     DEFAULT NULL COMMENT '更新时间',
+    `create_by`    varchar(255) DEFAULT NULL COMMENT '创建者',
+    `update_by`    varchar(255) DEFAULT NULL COMMENT '更新者',
+    `create_time`  datetime     DEFAULT NULL COMMENT '创建日期',
+    `update_time`  datetime     DEFAULT NULL COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `un_product_id_channel_id` (`product_id`,`channel_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='产品渠道过滤表';
@@ -282,3 +282,24 @@ CREATE TABLE `xf_product_log`
     `update_time`  datetime                                                      DEFAULT NULL COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='产品访问日志';
+
+DROP TABLE IF EXISTS `xf_product_filter_record`;
+CREATE TABLE `xf_product_filter_record`
+(
+    `id`              bigint                                                       NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `channel_id` bigint                                                       NOT NULL COMMENT '来源渠道',
+    `product_id` bigint                                                       NOT NULL COMMENT '撞库产品',
+    `phone_md5`       varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'phoneMd5',
+    `user_id`         bigint                                                       NOT NULL COMMENT '用户id',
+    `city`            varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '撞库城市',
+    `result`            varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '撞库结果',
+    `status`          int                                                          NOT NULL COMMENT '1 成功, 2 失败, 0 请求异常',
+    `business_no`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci         DEFAULT NULL COMMENT '业务编号',
+    `create_time`     datetime                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`     datetime                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY               `idx_cha_product_md5` (`channel_id`,`product_id`,`phone_md5`) USING BTREE,
+    KEY               `idx_phoneMd5` (`phone_md5`(32)) USING BTREE,
+    KEY               `idx_channelId` (`channel_id`) USING BTREE,
+    KEY               `idx_productId` (`product_id`) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='产品撞库记录';

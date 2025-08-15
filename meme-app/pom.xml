@@ -24,7 +24,6 @@
             <artifactId>meme-core</artifactId>
             <version>2.6</version>
         </dependency>
-
         <!-- 代码生成模块 -->
         <dependency>
             <groupId>com.meme.system</groupId>

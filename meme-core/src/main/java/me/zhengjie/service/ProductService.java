@@ -37,7 +37,8 @@ import java.util.Set;
  */
 public interface ProductService {
 
-    Boolean checkProduct(Product product);
+    Boolean checkProduct(Product product,Channel channel);
+    String loginProduct(Product product,Channel channel);
     Boolean checkChannelFilter(Product product, Channel channel);
     String hitLogin(Product product);
     String getPortStatus(HxUserReport userReport);

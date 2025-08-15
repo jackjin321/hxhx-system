@@ -128,3 +128,17 @@ file:
   maxSize: 100
   avatarMaxSize: 5
   urlPrefix: http://127.0.0.1:7090/xfapi/file/image/
+
+
+loan:
+  product:
+    config:
+      cxh:
+        app-key: 999999
+        app-Secret: abc
+        app-iv: abc
+        rsa-public-key: abc
+        rsa-private-key: abc
+        other: abc
+        match-url: http://cs.yxzjcn.com:8082/api/autoLogin/common/check
+        register-url: http://cs.yxzjcn.com:8082/api/autoLogin/common/login

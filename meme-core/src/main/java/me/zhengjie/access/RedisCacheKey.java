@@ -15,7 +15,8 @@ public class RedisCacheKey {
     }
 
     public static String productUnionLinkKey(String userId, String productId) {
-        return String.format("productUnionLink::%s::%s", userId, productId);
+        String today = DateUtils.nowLocalDateStr();
+        return String.format("productUnionLink::%s::%s::%s", today, userId, productId);
     }
 
     /**

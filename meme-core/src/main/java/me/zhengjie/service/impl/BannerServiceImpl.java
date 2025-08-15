@@ -246,8 +246,8 @@ public class BannerServiceImpl implements BannerService {
                 return ResultBuilder.fail("产品已经下架");
             }
             JSONObject dataMap = new JSONObject();
-            dataMap.put("url", product.getApplyLink());
-//            dataMap.put("url", productService.hitLogin(product));
+//            dataMap.put("url", product.getApplyLink());
+            dataMap.put("url", productService.loginProduct(product, channel));
 
             //Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
             insertProductLog(userId, product, channel, paramBanner);
@@ -277,19 +277,21 @@ public class BannerServiceImpl implements BannerService {
         Channel channelFinal = channel;
         List<Product> filterProductList = productList.stream().filter(product -> productService.checkChannelFilter(product, channelFinal)).collect(Collectors.toList());
         List<Product> filterList = filterProductList.stream().filter(p -> {
-            return productService.checkProduct(p);
+            return productService.checkProduct(p, channelFinal);
         }).collect(Collectors.toList());
         if (ObjectUtil.isNotEmpty(filterList) && filterList.size() > 0) {
             Product product = filterList.get(0);
+
             JSONObject dataMap = new JSONObject();
-            dataMap.put("url", product.getApplyLink());
-//            dataMap.put("url", productService.hitLogin(product));
+//            dataMap.put("url", product.getApplyLink());
+            dataMap.put("url", productService.loginProduct(product, channelFinal));
             insertProductLog(userId, product, channel, paramBanner);
             return ResultBuilder.data(dataMap);
         } else {
             return ResultBuilder.fail("产品信息不存在");
         }
     }
+
     @Override
     public String findOneByLogin(ParamBannerQuery paramBanner) {
         //Long userId = SecurityUtils.getCurrentUserIdByApp();
@@ -298,7 +300,7 @@ public class BannerServiceImpl implements BannerService {
         Channel channel = channelService.getChannelInfo(paramBanner.getChannelCode(), paramBanner.getUuid());
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(channel.getPortStatus(), "onShelves");
         List<Product> filterList = productList.stream().filter(p -> {
-            return productService.checkProduct(p);
+            return productService.checkProduct(p, channel);
         }).collect(Collectors.toList());
         if (ObjectUtil.isNotEmpty(filterList) && filterList.size() > 0) {
             Product product = filterList.get(0);
