@@ -13,25 +13,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoanProductMatchHandlerProcessor implements BeanPostProcessor {
 
-    //    @Resource
-//    private AbstractProductDbMatchHandler handler;
     @Autowired
     private ApplicationContext applicationContext;
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         log.info("====== postProcessAfterInitialization {} ============", beanName);
-        //log.warn("++++++++bean {} deal", beanName);
-//        if (bean instanceof AbstractProductDbMatchHandler<?> handler){
-//            LoanProductMatchHandlerHolder.register(handler);
-//        }
-        //LoanProductMatchHandlerHolder.register(handler);
-
         if (bean instanceof AbstractProductDbMatchHandler) {
-//            if (isBeanInstanceOfAbstractClass(beanName, AbstractProductDbMatchHandler.class)) {
-//                AbstractProductDbMatchHandler matchHandler = (AbstractProductDbMatchHandler) bean;
-//                LoanProductMatchHandlerHolder.register(matchHandler);
-//            }
             AbstractProductDbMatchHandler matchHandler = (AbstractProductDbMatchHandler) bean;
             LoanProductMatchHandlerHolder.register(matchHandler);
         }

@@ -130,7 +130,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> queryListV2(AppQueryCriteria criteria, HttpServletRequest request) {
         String channelCode = request.getHeader("channel-code");//登录渠道编号
         String uuid = request.getHeader("uuid");
-
+        String realIP = IPUtils.getIpAddr(request);
         Channel channel = channelService.getChannelInfo(channelCode, uuid);//登录渠道
 //        criteria.setPortStatus(channel.getPortStatus());
         //如果有雷达报告的，查一下雷达报告
@@ -150,6 +150,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> filterProductList = productList.stream().filter(product -> checkChannelFilter(product, channel)).collect(Collectors.toList());
         List<Product> filterList = filterProductList.stream().filter(p -> {
             log.info("check product {} ", p.getProductName());
+            p.setIp(realIP);
             return checkProduct(p, channel);
         }).collect(Collectors.toList());
         return productMapper.toDto(filterList).stream().map(p -> {

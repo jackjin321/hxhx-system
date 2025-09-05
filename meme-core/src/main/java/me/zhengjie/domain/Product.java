@@ -81,6 +81,8 @@ public class Product extends BaseEntity implements Serializable {
     private String rate;
     private String applyCondition;
 
+    @Transient
+    private String ip;
 
     public void copy(Product source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));

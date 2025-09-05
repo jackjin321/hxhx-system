@@ -142,3 +142,12 @@ loan:
         other: abc
         match-url: http://cs.yxzjcn.com:8082/api/autoLogin/common/check
         register-url: http://cs.yxzjcn.com:8082/api/autoLogin/common/login
+      ljhua:
+        app-key: ZN6JZF
+        app-Secret: _@Ks`Y*9jLb.hwqo}C;Gwmjk
+        app-iv: 2%2fTySe
+        rsa-public-key: abc
+        rsa-private-key: abc
+        other: abc
+        match-url: https://ljh.api.ruyuanhua.com/org/ld/check
+        register-url: https://ljh.api.ruyuanhua.com/org/ld/jointLogin
