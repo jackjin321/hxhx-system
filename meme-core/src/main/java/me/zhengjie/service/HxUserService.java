@@ -15,6 +15,7 @@
  */
 package me.zhengjie.service;
 
+import me.zhengjie.domain.Channel;
 import me.zhengjie.domain.HxUser;
 import me.zhengjie.service.dto.HxAuthorityDto;
 import me.zhengjie.service.dto.HxUserDto;
@@ -83,6 +84,7 @@ public interface HxUserService {
     HxUserLoginDto getLoginData(String phone);
 
     String createUser(String phone, String password, String platform, String uuid, String channelCode, HttpServletRequest request);
+    HxUser createUser(String phone, String password, String platform, Channel channel);
 
     /**
      * 获取用户权限信息

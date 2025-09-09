@@ -45,6 +45,20 @@ public class Channel extends BaseEntity implements Serializable {
 
     private String channelName;
     private String channelCode;
+    /**
+     * 渠道类型：h5，union
+     */
+    private String channelType;
+    /**
+     * 处理器编号
+     */
+    private String channelBean;
+
+    /**
+     * 渠道状态 0 禁用, 1 启用
+     */
+    private Integer status;
+
     private BigDecimal price;
     private String priceType;//价格类型，uv，cpa
     private String process;//流程控制，A面，助贷流程，B面，贷超流程

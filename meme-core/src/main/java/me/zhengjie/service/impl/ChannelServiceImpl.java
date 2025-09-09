@@ -3,6 +3,7 @@ package me.zhengjie.service.impl;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
+import me.zhengjie.enums.AbleEnum;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.access.ChannelObject;
 import me.zhengjie.domain.Channel;
@@ -146,7 +147,7 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     @Transactional
-    public ResponseEntity<Object> getChannelTokenByPlatformV1(String uuid, String browser,String platform, String deviceId, String channelCode,
+    public ResponseEntity<Object> getChannelTokenByPlatformV1(String uuid, String browser, String platform, String deviceId, String channelCode,
                                                               String realIp, String osId, String osName, HttpServletRequest request) {
         Optional<Channel> optionalChannel = findByUrlCodeOfVo(channelCode);
         if (!optionalChannel.isPresent()) {
@@ -231,7 +232,7 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
-    public Optional findByUrlCodeOfVo(String channelCode) {
+    public Optional<Channel> findByUrlCodeOfVo(String channelCode) {
         try {
             if (ObjectUtil.isNotEmpty(channelCode) && !"{}".equals(channelCode)) {
                 Channel channel = new Channel();
@@ -282,6 +283,19 @@ public class ChannelServiceImpl implements ChannelService {
         for (Long id : ids) {
             channelRepository.deleteById(id);
         }
+    }
+
+    @Override
+    public boolean checkChannelAccessibleOnMatch(Channel channelConf, String city) {
+        if (AbleEnum.isDisable(channelConf.getStatus())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String getChannelLink(Long channelId){
+        return null;
     }
 }
 

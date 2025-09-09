@@ -25,9 +25,9 @@ public interface BannerService {
 
     ResultModel toBannerUrlV2(ParamBannerQuery paramBannerQuery, HttpServletRequest request, String channelTokenHeader);
 
-    ResultModel toProductUrlV2(ParamBannerQuery paramBanner);
-    ResultModel findOne(ParamBannerQuery paramBanner);
-    String findOneByLogin(ParamBannerQuery paramBanner);
+//    ResultModel toProductUrlV2(ParamBannerQuery paramBanner);
+//    ResultModel findOne(ParamBannerQuery paramBanner);
+//    String findOneByLogin(ParamBannerQuery paramBanner);
     Object queryAll(AppQueryCriteria criteria, Pageable pageable);
 
     /**

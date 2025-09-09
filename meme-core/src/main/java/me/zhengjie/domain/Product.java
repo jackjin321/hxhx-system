@@ -42,16 +42,22 @@ public class Product extends BaseEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String portStatus;//AB面，A，B
+    /**
+     * AB面，A，B
+     */
+    private String portStatus;
 
     private String productName;
 
     private BigDecimal price;
 
+    /**
+     * 价格类型 uv, cpa
+     */
     private String priceType;
 
     /**
-     * 产品类型
+     * 产品类型：uv，union
      */
     private String productType;
     /**

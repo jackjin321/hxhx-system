@@ -37,15 +37,15 @@ import java.util.Set;
  */
 public interface ProductService {
 
-    Boolean checkProduct(Product product,Channel channel);
-    String loginProduct(Product product,Channel channel);
-    Boolean checkChannelFilter(Product product, Channel channel);
-    String hitLogin(Product product);
-    String getPortStatus(HxUserReport userReport);
+//    Boolean checkProduct(Product product,Channel channel);
+//    String loginProduct(Product product,Channel channel);
+//    Boolean checkChannelFilter(Product product, Channel channel);
+//    String hitLogin(Product product);
+//    String getPortStatus(HxUserReport userReport);
 
-    Integer getApplyNum(String productId);
+//    Integer getApplyNum(String productId);
 
-    Map<String, String> updateAvatar(MultipartFile file);
+//    Map<String, String> updateAvatar(MultipartFile file);
 
     /**
      * 分页查询
@@ -62,8 +62,8 @@ public interface ProductService {
      * @param criteria 条件
      * @return /
      */
-    List<ProductDto> queryList(AppQueryCriteria criteria, HttpServletRequest request);
-    List<ProductDto> queryListV2(AppQueryCriteria criteria, HttpServletRequest request);
+//    List<ProductDto> queryList(AppQueryCriteria criteria, HttpServletRequest request);
+//    List<ProductDto> queryListV2(AppQueryCriteria criteria, HttpServletRequest request);
 
     /**
      * 根据ID查询

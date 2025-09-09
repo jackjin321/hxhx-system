@@ -21,7 +21,7 @@ public interface ChannelService {
                                                       String channelCode, String ip, String osId,
                                                       String osName, HttpServletRequest request);
    String createChannelToken(ChannelLog channelLog, Channel channelVO);
-   Optional findByUrlCodeOfVo(String channelCode);
+   Optional<Channel> findByUrlCodeOfVo(String channelCode);
    Channel getChannelInfo(String channelCode,String uuid);
 
    Object queryAll(AppQueryCriteria criteria, Pageable pageable);
@@ -38,4 +38,13 @@ public interface ChannelService {
    void update(Channel resources);
 
    void delete(Set<Long> ids);
+
+   boolean checkChannelAccessibleOnMatch(Channel channelConf, String city);
+   /**
+    * 获取渠道投放链接
+    *
+    * @param channelId 渠道id
+    * @return 渠道链接
+    */
+   String getChannelLink(Long channelId);
 }

@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.annotation.Log;
 import me.zhengjie.domain.Product;
+import me.zhengjie.modules.jdfq.service.XfProductService;
 import me.zhengjie.service.ProductService;
 import me.zhengjie.service.dto.AppQueryCriteria;
 import org.springframework.data.domain.Pageable;
@@ -40,10 +41,11 @@ import java.util.Set;
 public class ProductController {
 
     private final ProductService productService;
+    private final XfProductService xfProductService;
 
     @PostMapping(value = "/uploadLogo")
     public ResponseEntity<Object> uploadLogo(@RequestParam MultipartFile file) {
-        return new ResponseEntity<>(productService.updateAvatar(file), HttpStatus.OK);
+        return new ResponseEntity<>(xfProductService.updateAvatar(file), HttpStatus.OK);
     }
 
     @GetMapping(value = "/list")

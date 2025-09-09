@@ -11,6 +11,7 @@ import me.zhengjie.domain.HxSysConfig;
 import me.zhengjie.domain.HxUserReport;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.app.service.AppUserService;
+import me.zhengjie.modules.union.engine.ProductBizActionEngine;
 import me.zhengjie.modules.util.TestClient_V2;
 import me.zhengjie.repository.HxUserReportRepository;
 import me.zhengjie.result.ResultModel;
@@ -48,9 +49,10 @@ import java.util.Map;
 @Slf4j
 public class CoreController {
 
-    private final ProductService productService;
+//    private final ProductService productService;
+    private final ProductBizActionEngine productBizActionEngine;
     private final ChannelService channelService;
-    private final BannerService bannerService;
+//    private final BannerService bannerService;
     private final AppUserService appUserService;
     private final HxSysConfigService sysConfigService;
     private final HxUserReportRepository hxUserReportRepository;
@@ -61,10 +63,10 @@ public class CoreController {
      * @param request 请求记录
      * @return
      */
-    @PostMapping("/getBannerListByPageAndPos")
-    public ResponseEntity<Object> getBannerListByPageAndPos(@RequestBody @Valid ParamBannerQuery paramBannerQuery, HttpServletRequest request) {
-        return bannerService.getBannerListByPageAndPosV1(paramBannerQuery, request);
-    }
+//    @PostMapping("/getBannerListByPageAndPos")
+//    public ResponseEntity<Object> getBannerListByPageAndPos(@RequestBody @Valid ParamBannerQuery paramBannerQuery, HttpServletRequest request) {
+//        return bannerService.getBannerListByPageAndPosV1(paramBannerQuery, request);
+//    }
 
     /**
      * 点击广告位
@@ -74,14 +76,14 @@ public class CoreController {
      * @param request
      * @return
      */
-    @PostMapping("/toBanner")
-    public ResultModel toBannerUrl(@RequestBody @Valid ParamBannerQuery paramBannerQuery,
-                                   @RequestHeader(name = "channel-token", required = false) String channelTokenHeader,
-                                   HttpServletRequest request) {
-
-        return bannerService.toBannerUrlV2(paramBannerQuery, request, channelTokenHeader);
-
-    }
+//    @PostMapping("/toBanner")
+//    public ResultModel toBannerUrl(@RequestBody @Valid ParamBannerQuery paramBannerQuery,
+//                                   @RequestHeader(name = "channel-token", required = false) String channelTokenHeader,
+//                                   HttpServletRequest request) {
+//
+//        return bannerService.toBannerUrlV2(paramBannerQuery, request, channelTokenHeader);
+//
+//    }
 
     /**
      * 点击产品
@@ -102,7 +104,7 @@ public class CoreController {
         paramBannerQuery.setChannelCode(channelCode);
         String realIP = IPUtils.getIpAddr(request);
         paramBannerQuery.setRealIP(realIP);
-        return bannerService.toProductUrlV2(paramBannerQuery);
+        return productBizActionEngine.toProductUrlV2(paramBannerQuery);
 
     }
 
@@ -141,7 +143,7 @@ public class CoreController {
             if (ObjectUtil.isNotEmpty(userReport1)) {
                 log.info("全景雷达报告已存在");
                 //判断一下userReport
-                String portStatus = productService.getPortStatus(userReport1);
+                String portStatus = productBizActionEngine.getPortStatus(userReport1);
                 authInfo.put("port", portStatus);
                 return ResponseEntity.ok(authInfo);
             }
@@ -199,7 +201,7 @@ public class CoreController {
                 }
             }
             //判断一下userReport
-            String portStatus = productService.getPortStatus(userReport);
+            String portStatus = productBizActionEngine.getPortStatus(userReport);
             authInfo.put("port", portStatus);
             hxUserReportRepository.save(userReport);
         }
@@ -217,7 +219,7 @@ public class CoreController {
     @GetMapping(value = "/product/list")
     public ResponseEntity<Object> productList(AppQueryCriteria criteria, Pageable pageable, HttpServletRequest request) {
         //Long userId = SecurityUtils.getCurrentUserIdByApp();
-        return new ResponseEntity<>(productService.queryListV2(criteria, request), HttpStatus.OK);
+        return new ResponseEntity<>(productBizActionEngine.queryListV2(criteria, request), HttpStatus.OK);
     }
 
     /**
@@ -265,7 +267,7 @@ public class CoreController {
         paramBannerQuery.setChannelCode(channelCode);
         String realIP = IPUtils.getIpAddr(request);
         paramBannerQuery.setRealIP(realIP);
-        return bannerService.findOne(paramBannerQuery);
+        return productBizActionEngine.findOne(paramBannerQuery);
     }
 
     @GetMapping(value = "/test")
@@ -301,8 +303,8 @@ public class CoreController {
         return channelService.getChannelTokenByPlatformV1(uuid, browser, platform, deviceId, channelId, realIP, osId, osName, request);
     }
 
-    @PostMapping(value = "/uploadLogo")
-    public ResponseEntity<Object> uploadLogo(@RequestParam MultipartFile file) {
-        return new ResponseEntity<>(productService.updateAvatar(file), HttpStatus.OK);
-    }
+//    @PostMapping(value = "/uploadLogo")
+//    public ResponseEntity<Object> uploadLogo(@RequestParam MultipartFile file) {
+//        return new ResponseEntity<>(productBizActionEngine.updateAvatar(file), HttpStatus.OK);
+//    }
 }

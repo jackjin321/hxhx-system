@@ -16,7 +16,6 @@
 package me.zhengjie.modules.security.rest;
 
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.wf.captcha.base.Captcha;
@@ -28,16 +27,14 @@ import me.zhengjie.annotation.Log;
 import me.zhengjie.annotation.rest.AnonymousDeleteMapping;
 import me.zhengjie.annotation.rest.AnonymousGetMapping;
 import me.zhengjie.annotation.rest.AnonymousPostMapping;
-import me.zhengjie.config.RsaProperties;
-import me.zhengjie.domain.HxAccessRecord;
 //import me.zhengjie.domain.HxSysConfig;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.app.service.AppUserService;
-import me.zhengjie.modules.security.config.bean.LoginCodeEnum;
 import me.zhengjie.modules.security.config.bean.LoginProperties;
 import me.zhengjie.modules.security.config.bean.SecurityProperties;
 import me.zhengjie.modules.security.security.TokenProvider;
 import me.zhengjie.modules.security.service.OnlineUserService;
+import me.zhengjie.modules.union.engine.ProductBizActionEngine;
 import me.zhengjie.repository.HxAccessRecordRepository;
 //import me.zhengjie.service.HxSysConfigService;
 import me.zhengjie.result.ResultBuilder;
@@ -86,7 +83,8 @@ public class AuthorizationController {
     private final HxUserMapper hxUserMapper;
     private final HxAccessRecordRepository hxAccessRecordRepository;
     private final AppUserService appUserService;
-    private final BannerService bannerService;
+//    private final BannerService bannerService;
+    private final ProductBizActionEngine bizActionEngine;
     @Resource
     private LoginProperties loginProperties;
 //    private final HxSysConfigService sysConfigService;
@@ -187,7 +185,7 @@ public class AuthorizationController {
             paramBanner.setRealIP(realIP);
             paramBanner.setPhone(authUser.getUsername());
             paramBanner.setUserId(hxJwtUserDto.getUser().getUserId());
-            actionUrl = bannerService.findOneByLogin(paramBanner);
+            actionUrl = bizActionEngine.findOneByLogin(paramBanner);
         }
 
         String finalActionUrl = actionUrl;

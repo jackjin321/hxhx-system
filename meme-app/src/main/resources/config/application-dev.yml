@@ -1,7 +1,7 @@
 server:
   port: 7090
   servlet:
-    context-path: /xfapi
+    context-path: /jhapi
 #配置数据源
 spring:
   redis:

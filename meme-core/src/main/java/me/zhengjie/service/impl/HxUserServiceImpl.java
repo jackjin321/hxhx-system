@@ -21,6 +21,7 @@ import cn.hutool.crypto.digest.DigestUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.access.ChannelObject;
+import me.zhengjie.domain.Channel;
 import me.zhengjie.domain.ChannelLog;
 import me.zhengjie.domain.HxUser;
 import me.zhengjie.exception.BadRequestException;
@@ -137,6 +138,38 @@ public class HxUserServiceImpl implements HxUserService {
         } else {
             return hxUserLoginMapper.toDto(user);
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public HxUser createUser(String phone, String password, String platform, Channel channel) {
+        HxUser user = hxUserRepository.findByPhone(phone);
+        if (user == null) {
+            //新用户注册
+            HxUser hxUser = new HxUser();
+            hxUser.setChannelId(channel.getId());//注册渠道
+            hxUser.setChannelName(channel.getChannelName());//注册渠道
+            hxUser.setPlatform(platform);
+            hxUser.setUsername(phone);
+            hxUser.setPhone(phone);
+            hxUser.setPhoneMd5(DigestUtil.md5Hex(phone));
+            hxUser.setPassword(passwordEncoder.encode(password));
+            hxUser.setEnabled(true);
+            hxUser.setRegisterTime(new Date());
+            hxUser.setLastLoginTime(new Date());
+            hxUser.setLastOpTime(new Date());
+            //分配客服
+
+            hxUserRepository.save(hxUser);
+            //channelLogRepository.updateSubCntById(hxUser.getUserId(), channel.getId(), channel.getChannelName(), true, true, channelObject.getChannelLogId());
+            //新用户
+
+        } else {
+            //老用户登陆
+            //channelLogRepository.updateSubCntById(user.getUserId(), user.getChannelId(), user.getChannelName(), false, true, channelObject.getChannelLogId());
+
+        }
+        return user;
     }
 
     @Override

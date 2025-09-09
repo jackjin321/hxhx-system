@@ -5,6 +5,7 @@ package me.zhengjie.modules.app.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.XmlUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -15,12 +16,27 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.access.RedisCacheKey;
+import me.zhengjie.domain.Channel;
+import me.zhengjie.domain.HxUser;
 import me.zhengjie.modules.app.service.AppUserService;
+import me.zhengjie.modules.security.config.bean.SecurityProperties;
+import me.zhengjie.modules.security.security.TokenProvider;
+import me.zhengjie.modules.security.service.OnlineUserService;
+import me.zhengjie.modules.union.dto.H5ChannelUnionLoginResultDTO;
+import me.zhengjie.modules.union.dto.RequestIdUtil;
+import me.zhengjie.modules.union.vo.H5ChannelRegisterBaseRequest;
+import me.zhengjie.service.HxUserService;
+import me.zhengjie.service.dto.HxAuthUserDto;
+import me.zhengjie.service.dto.HxJwtUserDto;
 import me.zhengjie.utils.RandomUtil;
 import me.zhengjie.utils.RedisUtils;
 import me.zhengjie.utils.SecurityUtils;
 import me.zhengjie.utils.StringUtils;
 import me.zhengjie.vo.MemberAuth;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,8 +60,12 @@ public class AppUserServiceImpl implements AppUserService {
     private static final String accountSid = "91a2f1057c6075cd1c1470331855de9e";
     private static final String authToken = "25dcfec252e8a9d043ce49e87c067fba";
 
-
+    private final OnlineUserService onlineUserService;
+    private final SecurityProperties properties;
     private final RedisUtils redisUtils;
+    private final HxUserService hxUserService;
+    private final TokenProvider tokenProvider;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Override
     public boolean checkSmsCode(String phone, String code) {
@@ -147,15 +167,16 @@ public class AppUserServiceImpl implements AppUserService {
         //String sig = DigestUtil.md5Hex(String.format("%s%s%d", accountSid, authToken, currentTimeMillis));
         Map<String, Object> param = new HashMap<>();
         param.put("userid", 257);
-        param.put("account", "chxxyzm");
-        param.put("password", "123456Ch");
+        param.put("account", "");
+        param.put("password", "");
         param.put("mobile", phone);
-        param.put("content", String.format("【臣禾信息】您的验证码为：%s，请在5分钟内输入，请勿转发或告知他人，谨防诈骗。", code));
+        param.put("content", String.format("【】您的验证码为：%s，请在5分钟内输入，请勿转发或告知他人，谨防诈骗。", code));
         param.put("action", "send");
         param.put("sendTime", "");
         param.put("extno", "");
 
-        HttpResponse response = HttpUtil.createPost("http://121.40.72.241:8868/sms.aspx").form(param).execute();
+//        HttpResponse response = HttpUtil.createPost("http://121.40.72.241:8868/sms.aspx").form(param).execute();
+        HttpResponse response = HttpUtil.createPost("").form(param).execute();
 
         int status = response.getStatus();
         String body = response.body();
@@ -259,4 +280,61 @@ public class AppUserServiceImpl implements AppUserService {
         return checkResult;
     }
 
+
+    @Override
+    public H5ChannelUnionLoginResultDTO chaUnionLogin(H5ChannelRegisterBaseRequest request, Channel channelConf) {
+        return doUnionLogin(request.getPhone(), request.getCity(), channelConf);
+    }
+
+    /**
+     * 执行登录
+     *
+     * @param phone       明文手机号
+     * @param city        请求城市
+     * @param requestInfo 请求基础信息
+     * @return token
+     */
+    private H5ChannelUnionLoginResultDTO doUnionLogin(String phone, String city, Channel channel) {
+        // 查询或注册用户
+        HxAuthUserDto authUser = new HxAuthUserDto();
+
+        //UserInfo userInfo = userInfoService.queryOrCreateUser(phone, phone, city, requestInfo.getIpAddress(), channel);
+        HxUser userInfo = hxUserService.createUser(authUser.getUsername(), authUser.getPassword(), authUser.getPlatform(), channel);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword());
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 生成令牌与第三方系统获取令牌方式
+        // UserDetails userDetails = userDetailsService.loadUserByUsername(userInfo.getUsername());
+        // Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        // SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = tokenProvider.createToken(authentication);
+        final HxJwtUserDto hxJwtUserDto = (HxJwtUserDto) authentication.getPrincipal();
+        // 保存在线信息
+        //onlineUserService.save(hxJwtUserDto, token, request);
+
+        // 返回 token 与 用户信息
+        Map<String, Object> authInfo = new HashMap<String, Object>(2) {{
+            put("token", properties.getTokenStartWith() + token);
+            put("user", hxJwtUserDto);
+            put("process", channel.getProcess());
+        }};
+
+        //生成撞库容器id
+//        String containerKey = RedisKeyPattern.LOAN_USER_MATCH_CONTAINER.formatted(userInfo.getId() + RequestIdUtil.buildRequestId("mci"));
+
+        // 构建登录用户
+//        H5LoginUser h5LoginUser = H5LoginUser.builder()
+//                .userId(userInfo.getId())
+//                .phoneMd5(SecureUtil.md5(phone))
+//                .matchContainerId(containerKey)
+//                .channelId(channel.getId()).build();
+        // 执行登录
+        //String tokenStr = stpTokenHandler.login(userInfo.getId(), h5LoginUser);
+
+        return H5ChannelUnionLoginResultDTO.builder()
+                .h5LoginUser(hxJwtUserDto)
+                .tokenStr(properties.getTokenStartWith() + token)
+                .userInfo(userInfo).build();
+    }
 }
