@@ -98,8 +98,8 @@ public class AppUserServiceImpl implements AppUserService {
         String code = RandomUtil.randomNumber(6);
         log.info("code {}", code);
         //发送短信，需要重新找一个渠道
-//        boolean flag = sendFanQin(phone, code);
-        boolean flag = sendFanQinV2(phone, code);
+        boolean flag = sendFanQin(phone, code);
+//        boolean flag = sendFanQinV2(phone, code);
         if (flag) {
             redisUtils.del(RedisCacheKey.loginCodeKey(phone));
             // 保存

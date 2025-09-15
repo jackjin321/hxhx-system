@@ -61,7 +61,6 @@ public class ProductBizActionEngine {
     private RedisUtils redisUtils;
 
 
-
     public String getPortStatus(HxUserReport hxUserReport) {
         /**
          * 雷达报告通过，就是展示B面，不通过，就展示A面
@@ -154,7 +153,7 @@ public class ProductBizActionEngine {
         List<Product> productList = productRepository.findByPortStatusAndStatusOrderBySortAsc(portStatus, "onShelves");
         List<Product> filterProductList = productList.stream().filter(product -> checkChannelFilter(product, channel)).collect(Collectors.toList());
         List<Product> filterList = filterProductList.stream().filter(p -> {
-            log.info("check product {} ", p.getProductName());
+            log.info("check product {} {} ", p.getProductName(), p.getProductType());
             p.setIp(realIP);
             return checkProduct(p, channel);
         }).collect(Collectors.toList());
@@ -167,7 +166,9 @@ public class ProductBizActionEngine {
     public Boolean checkProduct(Product product, Channel channel) {
         if ("uv".equals(product.getProductType())) {
             return true;
-        } else {
+        } else if ("login".equals(product.getProductType())) {
+            return true;
+        } else if ("union".equals(product.getProductType())) {
             AbstractProductDbMatchHandler<?> handler = LoanProductMatchHandlerHolder.getHandler(product.getProductCode());
             if (Objects.isNull(handler)) {
                 // 未配置联登处理器
@@ -192,6 +193,8 @@ public class ProductBizActionEngine {
                 return true;
             }
             return false;
+        } else {
+            return true;
         }
     }
 
@@ -203,7 +206,7 @@ public class ProductBizActionEngine {
         }
         if ("uv".equals(product.getProductType())) {
             return product.getApplyLink();
-        } else if ("union".equals(product.getProductType())) {
+        } else if ("union".equals(product.getProductType()) || "login".equals(product.getProductType())) {
             AbstractProductDbMatchHandler<?> handler = LoanProductMatchHandlerHolder.getHandler(product.getProductCode());
             if (Objects.isNull(handler)) {
                 // 未配置联登处理器
@@ -260,6 +263,7 @@ public class ProductBizActionEngine {
             return ResultBuilder.fail("产品信息不存在");
         }
     }
+
     public ResultModel toProductUrlV2(ParamBannerQuery paramBanner) {
         Long userId = SecurityUtils.getCurrentUserIdByApp();
 
@@ -331,7 +335,6 @@ public class ProductBizActionEngine {
     }
 
 
-
     public String getUnionUrlByProduct(String userId, String productId) {
         String applyNumKey = RedisCacheKey.productUnionLinkKey(userId, productId);
         String cacheCode = (String) redisUtils.get(applyNumKey);
@@ -369,8 +372,6 @@ public class ProductBizActionEngine {
         }
         return true;
     }
-
-
 
 
     private Boolean checkHit(Product product) {

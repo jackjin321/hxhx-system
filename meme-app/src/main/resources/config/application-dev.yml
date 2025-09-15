@@ -151,3 +151,12 @@ loan:
         other: abc
         match-url: https://ljh.api.ruyuanhua.com/org/ld/check
         register-url: https://ljh.api.ruyuanhua.com/org/ld/jointLogin
+      rhhua:
+        app-key: TZFWML
+        app-Secret: 6454A9AFCC693CAA
+        app-iv: abc
+        rsa-public-key: abc
+        rsa-private-key: abc
+        other: abc
+        match-url: abc
+        register-url: https://api.kmgx.cn/apiunion/channel/unionLoginCommon/TZFWML

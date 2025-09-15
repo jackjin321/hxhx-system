@@ -28,7 +28,8 @@ import java.math.BigDecimal;
 */
 @Getter
 @Setter
-public class ProductDto extends BaseDTO implements Serializable {
+//public class ProductDto extends BaseDTO implements Serializable {
+public class ProductDto implements Serializable {
 
 	/**
 	 * 应用编号
