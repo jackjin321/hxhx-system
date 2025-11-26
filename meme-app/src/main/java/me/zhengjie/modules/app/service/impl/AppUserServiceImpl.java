@@ -55,8 +55,8 @@ public class AppUserServiceImpl implements AppUserService {
     private static final String path = "/eid/check";
     private static final String gateway = "https://openapi.danmi.com/";
     private static final String wayUrl = "/textSMS/sendSMS/batch/v1";
-    private static final String signName = "助帮";
-    private static final String accountId = "100140147453";
+    private static final String signName = "";
+    private static final String accountId = "";
     private static final String accountSid = "91a2f1057c6075cd1c1470331855de9e";
     private static final String authToken = "25dcfec252e8a9d043ce49e87c067fba";
 
@@ -98,8 +98,8 @@ public class AppUserServiceImpl implements AppUserService {
         String code = RandomUtil.randomNumber(6);
         log.info("code {}", code);
         //发送短信，需要重新找一个渠道
-        boolean flag = sendFanQin(phone, code);
-//        boolean flag = sendFanQinV2(phone, code);
+//        boolean flag = sendFanQin(phone, code);
+        boolean flag = sendFanQinV2(phone, code);
         if (flag) {
             redisUtils.del(RedisCacheKey.loginCodeKey(phone));
             // 保存
@@ -167,16 +167,15 @@ public class AppUserServiceImpl implements AppUserService {
         //String sig = DigestUtil.md5Hex(String.format("%s%s%d", accountSid, authToken, currentTimeMillis));
         Map<String, Object> param = new HashMap<>();
         param.put("userid", 257);
-        param.put("account", "");
-        param.put("password", "");
+        param.put("account", "chxxyzm");
+        param.put("password", "123456Ch");
         param.put("mobile", phone);
-        param.put("content", String.format("【】您的验证码为：%s，请在5分钟内输入，请勿转发或告知他人，谨防诈骗。", code));
+        param.put("content", String.format("【臣禾信息】您的验证码为：%s，请在5分钟内输入，请勿转发或告知他人，谨防诈骗。", code));
         param.put("action", "send");
         param.put("sendTime", "");
         param.put("extno", "");
 
-//        HttpResponse response = HttpUtil.createPost("http://121.40.72.241:8868/sms.aspx").form(param).execute();
-        HttpResponse response = HttpUtil.createPost("").form(param).execute();
+        HttpResponse response = HttpUtil.createPost("http://121.40.72.241:8868/sms.aspx").form(param).execute();
 
         int status = response.getStatus();
         String body = response.body();

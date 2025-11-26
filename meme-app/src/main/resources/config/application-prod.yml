@@ -150,6 +150,16 @@ file:
 loan:
   product:
     config:
+      cxh2:
+        app-key: fhakswq
+        app-Secret: abc
+        app-iv: abc
+        rsa-public-key: abc
+        rsa-private-key: abc
+        other: abc
+        match-url: http://xx.yxzjcn.com:18082/api/autoLogin/common/check
+#        register-url: http://xx.yxzjcn.com:18082/api/autoLogin/common/login
+        register-url: http://xx.yxzjcn.com:18082/api/autoLogin/commonpush/login
       cxh:
         app-key: iekgqk
         app-Secret: abc
