@@ -150,6 +150,15 @@ file:
 loan:
   product:
     config:
+      xiaoRongBao:
+        app-key: xZze
+        app-Secret: TMh984xC8K2Ydzgs
+        app-iv: HmItDKuuVDx6FBJy
+        rsa-public-key: abc
+        rsa-private-key: abc
+        other: abc
+        match-url: abc
+        register-url: https://dc.xiaorongbao.cn/dc/api/genera/login
       cxh2:
         app-key: fhakswq
         app-Secret: abc
